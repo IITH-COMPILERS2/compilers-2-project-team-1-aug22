@@ -1,0 +1,7 @@
+main->int
+'
+    int a = 100
+    a = a / 2
+    output : " Half value of given input is " , a
+    exit : 0
+'
