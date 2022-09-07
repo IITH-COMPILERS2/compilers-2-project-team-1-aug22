@@ -8,6 +8,7 @@ E			[Ee][+-]?{D}+
 %{
     #include <stdio.h>
     void count();
+	void comment();
 %}
 
 %%
@@ -72,6 +73,20 @@ E			[Ee][+-]?{D}+
 %%
 
 int column = 0;
+
+void comment()
+{
+  int c;
+
+  /* Read until we find \n or EOF */
+  while((c = input()) != '\n' && c != EOF)
+    ;
+
+  /* Maybe you want to place back EOF? */
+  if(c == EOF)
+    unput(c);
+}
+
 
 void count()
 {
