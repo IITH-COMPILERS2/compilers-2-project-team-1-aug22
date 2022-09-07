@@ -6,9 +6,12 @@ H			[a-fA-F0-9]                             /*doubtful*/
 E			[Ee][+-]?{D}+
 
 %{
-    #include <stdio.h>
-    void count();
+    	#include <stdio.h>
+    	void count();
 	void comment();
+	void token_c(FILE* fp);
+	void token_pr(FILE* fp2, char str[]);
+	int token_no = 0;
 %}
 
 %%
@@ -87,6 +90,16 @@ void comment()
     unput(c);
 }
 
+void token_c(FILE* fp){
+	token_no++;
+	fprintf(fp, "%d ", token_no);
+	return;
+}
+
+void token_pr(FILE* fp2, char str[]){
+	fprintf(fp2, "%s\n", str);
+	return;
+}
 
 void count()
 {
