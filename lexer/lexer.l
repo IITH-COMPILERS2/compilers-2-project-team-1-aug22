@@ -36,6 +36,7 @@ E			[Ee][+-]?{D}+
 "parabola"		{ count(); printf("PARABOLA"); }
 "ellipse"		{ count(); printf("ELLIPSE"); }
 "hyperbola"		{ count(); printf("HYPERBOLA"); }
+"input"         { count(); printf("INPUT"); }
 
 "("             { count(); printf("("); }
 ")"             { count(); printf(")"); }
