@@ -6,7 +6,7 @@ H			[a-fA-F0-9]
 E			[Ee][+-]?{D}+
 
 %{
-    	#include <stdio.h>
+		#include <stdio.h>
 		#include <stdlib.h>
 		#include <string.h>
 
@@ -26,23 +26,23 @@ E			[Ee][+-]?{D}+
 "if"					{ token_c(fp2); token_pr(fp2,"IF"); }
 "int"					{ token_c(fp2); token_pr(fp2,"INT"); }
 "double"				{ token_c(fp2); token_pr(fp2,"DOUBLE"); }
-"bool"		    		{ token_c(fp2); token_pr(fp2,"BOOL"); }
+"bool"					{ token_c(fp2); token_pr(fp2,"BOOL"); }
 "string"				{ token_c(fp2); token_pr(fp2,"STRING"); }
 "long"					{ token_c(fp2); token_pr(fp2,"LONG"); }
-"frac"		    		{ token_c(fp2); token_pr(fp2,"FRAC"); }
-"exit"		    		{ token_c(fp2); token_pr(fp2,"EXIT"); }
+"frac"					{ token_c(fp2); token_pr(fp2,"FRAC"); }
+"exit"					{ token_c(fp2); token_pr(fp2,"EXIT"); }
 "struct"				{ token_c(fp2); token_pr(fp2,"STRUCT"); }        
 "typedef"				{ token_c(fp2); token_pr(fp2,"TYPEDEF"); }       
 "void"					{ token_c(fp2); token_pr(fp2,"VOID"); }
 "loop"					{ token_c(fp2); token_pr(fp2,"LOOP"); }
-"input"                	{ token_c(fp2); token_pr(fp2,"INPUT"); }
-"output"                { token_c(fp2); token_pr(fp2,"OUTPUT"); }   
+"input"					{ token_c(fp2); token_pr(fp2,"INPUT"); }
+"output"				{ token_c(fp2); token_pr(fp2,"OUTPUT"); }   
 "true"		     		{ token_c(fp2); token_pr(fp2,"TRUE"); }
-"false"	             	{ token_c(fp2); token_pr(fp2,"FALSE"); }
+"false"					{ token_c(fp2); token_pr(fp2,"FALSE"); }
 
-"point"		    		{ token_c(fp2); token_pr(fp2,"POINT"); }
-"line"		    		{ token_c(fp2); token_pr(fp2,"LINE"); }
-"conic"		    		{ token_c(fp2); token_pr(fp2,"CONIC"); }
+"point"					{ token_c(fp2); token_pr(fp2,"POINT"); }
+"line"					{ token_c(fp2); token_pr(fp2,"LINE"); }
+"conic"					{ token_c(fp2); token_pr(fp2,"CONIC"); }
 "line_pair"				{ token_c(fp2); token_pr(fp2,"LINE_PAIR"); }
 "circle"				{ token_c(fp2); token_pr(fp2,"CIRCLE"); }
 "parabola"				{ token_c(fp2); token_pr(fp2,"PARABOLA"); }
@@ -92,8 +92,8 @@ E			[Ee][+-]?{D}+
 
 {L}({L}|{D})*     		{ token_c(fp2); token_pr(fp2,"IDENTIFIER"); }
 [+-]?{D}+[.]{D}+   		{ token_c(fp2); token_pr(fp2,"FLOAT_CONST"); }
-[+-]?{D}+               { token_c(fp2); token_pr(fp2,"INT_CONST"); }
-\"([^\\\"]|\\.)*\"    	{ token_c(fp2); token_pr(fp2,"STRING_LITERAL"); }
+[+-]?{D}+				{ token_c(fp2); token_pr(fp2,"INT_CONST"); }
+\"([^\\\"]|\\.)*\"		{ token_c(fp2); token_pr(fp2,"STRING_LITERAL"); }
 
 "("             		{ token_c(fp2); token_pr(fp2,"("); }
 ")"             		{ token_c(fp2); token_pr(fp2,")"); }
@@ -121,7 +121,7 @@ E			[Ee][+-]?{D}+
 ","			    		{ token_c(fp2); token_pr(fp2,","); }
 ":"			    		{ token_c(fp2); token_pr(fp2,":"); }
 "->"					{ token_c(fp2); token_pr(fp2,"PTR_OP"); }
-"'"             		{ token_c(fp2); token_pr(fp2,"FUNC_OP");}
+"'"						{ token_c(fp2); token_pr(fp2,"FUNC_OP");}
 
 .			    		{ /* ignore bad characters */ }
 
