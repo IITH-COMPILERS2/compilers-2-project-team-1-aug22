@@ -1,0 +1,9 @@
+main->int
+'
+    int a=2002
+    frac b=2/3
+    frac c = 0/2027
+    frac d = 1/09
+    frac e = 4/0
+    exit : 0
+'

@@ -1,6 +1,7 @@
 %option noyywrap
 
 D			[0-9]
+NZD         [1-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]                             
 E			[Ee][+-]?{D}+
@@ -91,7 +92,8 @@ E			[Ee][+-]?{D}+
 "asymptotes"			{ token_c(fp2); token_pr(fp2,"ASYMPTOTES"); }
 
 {L}({L}|{D})*     		{ token_c(fp2); token_pr(fp2,"IDENTIFIER"); }
-[+-]?{D}+[.]{D}+   		{ token_c(fp2); token_pr(fp2,"FLOAT_CONST"); }
+[+-]?{D}+\/({NZD}{D}*|0+{NZD}{D}*)	{ token_c(fp2); token_pr(fp2,"FRAC_CONST"); }
+[+-]?{D}+[.]{D}+   		{ token_c(fp2); token_pr(fp2,"DOUBLE_CONST"); }
 [+-]?{D}+				{ token_c(fp2); token_pr(fp2,"INT_CONST"); }
 \"([^\\\"]|\\.)*\"		{ token_c(fp2); token_pr(fp2,"STRING_LITERAL"); }
 
