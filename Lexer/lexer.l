@@ -5,6 +5,8 @@ NZD         [1-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]                             
 E			[Ee][+-]?{D}+
+DEC 		[+-]?{D}+[.]{D}+
+INT			[+-]?{D}+	
 
 %{
 		#include <stdio.h>
@@ -91,11 +93,11 @@ E			[Ee][+-]?{D}+
 "conj_axis"				{ token_c(fp2); token_pr(fp2,"CONJ_AXIS"); }
 "asymptotes"			{ token_c(fp2); token_pr(fp2,"ASYMPTOTES"); }
 
-{L}({L}|{D})*     		{ token_c(fp2); token_pr(fp2,"IDENTIFIER"); }
-[+-]?{D}+\/({NZD}{D}*|0+{NZD}{D}*)	{ token_c(fp2); token_pr(fp2,"FRAC_CONST"); }
-[+-]?{D}+[.]{D}+   		{ token_c(fp2); token_pr(fp2,"DOUBLE_CONST"); }
-[+-]?{D}+				{ token_c(fp2); token_pr(fp2,"INT_CONST"); }
-\"([^\\\"]|\\.)*\"		{ token_c(fp2); token_pr(fp2,"STRING_LITERAL"); }
+{L}({L}|{D})*     				{ token_c(fp2); token_pr(fp2,"IDENTIFIER"); }
+{INT}\/({NZD}{D}*|0+{NZD}{D}*)	{ token_c(fp2); token_pr(fp2,"FRAC_CONST"); }
+{DEC}				  			{ token_c(fp2); token_pr(fp2,"DOUBLE_CONST"); }
+{INT}							{ token_c(fp2); token_pr(fp2,"INT_CONST"); }
+\"([^\\\"]|\\.)*\"				{ token_c(fp2); token_pr(fp2,"STRING_LITERAL"); }
 
 "("             		{ token_c(fp2); token_pr(fp2,"("); }
 ")"             		{ token_c(fp2); token_pr(fp2,")"); }
@@ -122,7 +124,7 @@ E			[Ee][+-]?{D}+
 ">"			    		{ token_c(fp2); token_pr(fp2,">"); }
 ","			    		{ token_c(fp2); token_pr(fp2,","); }
 ":"			    		{ token_c(fp2); token_pr(fp2,":"); }
-"->"					{ token_c(fp2); token_pr(fp2,"PTR_OP"); }
+"->"					{ token_c(fp2); token_pr(fp2,"ARROW"); }
 "'"						{ token_c(fp2); token_pr(fp2,"FUNC_OP");}
 
 .			    		{ /* ignore bad characters */ }
