@@ -19,8 +19,8 @@ E			[Ee][+-]?{D}+
 %}
 
 %%
-"\n"					{ token_c(fp2); token_pr(fp2,"EOL");}
 "#"			    		{ token_c(fp2); }
+"\n"					{ token_c(fp2); token_pr(fp2,"EOL");}
 "break"					{ token_c(fp2); token_pr(fp2,"BREAK"); }
 "continue"				{ token_c(fp2); token_pr(fp2,"CONTINUE"); }
 "else"					{ token_c(fp2); token_pr(fp2,"ELSE"); }
