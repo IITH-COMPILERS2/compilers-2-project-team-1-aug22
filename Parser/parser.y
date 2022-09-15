@@ -33,3 +33,4 @@ external_declaration
 
 function_definition
     : IDENTIFIER parameter_list '->' declaration_specifiers compound_statement
+	;
