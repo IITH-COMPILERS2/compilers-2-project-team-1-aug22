@@ -103,12 +103,13 @@ INT			[+-]?{D}+
 ")"             		{ token_c(fp2); token_pr(fp2,")"); }
 "."             		{ token_c(fp2); token_pr(fp2,"."); }
 "!"             		{ token_c(fp2); token_pr(fp2,"!"); }
+"^"             		{ token_c(fp2); token_pr(fp2,"^"); }
 
-"* "            		{ token_c(fp2); token_pr(fp2, "MUL_OP");}
+"*"            			{ token_c(fp2); token_pr(fp2, "MUL_OP");}
 "/"             		{ token_c(fp2); token_pr(fp2, "DIV_OP");}
 "+"             		{ token_c(fp2); token_pr(fp2, "ADD_OP");}
 "-"             		{ token_c(fp2); token_pr(fp2, "SUB_OP");}
-"^"             		{ token_c(fp2); token_pr(fp2, "POW_OP"); }
+"^^"             		{ token_c(fp2); token_pr(fp2, "POW_OP"); }
 "=="            		{ token_c(fp2); token_pr(fp2, "EQ_OP");}
 
 "&&"					{ token_c(fp2); token_pr(fp2,"AND_OP"); }
