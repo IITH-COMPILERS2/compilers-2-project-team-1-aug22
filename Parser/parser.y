@@ -8,3 +8,18 @@
 %token STRUCT INPUT OUTPUT
 
 %token IF ELSE LOOP CONTINUE BREAK EXIT
+
+%start translation_unit
+
+translation_unit
+	: external_declaration
+	| translation_unit external_declaration
+	;
+
+external_declaration
+	: function_definition
+	| declaration
+	;
+
+function_definition
+    : IDENTIFIER parameter_list '->' declaration_specifiers compound_statement
