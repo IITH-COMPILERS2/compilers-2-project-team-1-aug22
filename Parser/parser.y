@@ -1,6 +1,7 @@
 %token IDENTIFIER FRAC_CONST DOUBLE_CONST INT_CONST STRING_LITERAL
 %token ARROW LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN ADD_ASSIGN
+%token FUN_ST FUN_EN
 
 %token STRING INT LONG BOOL FRAC DOUBLE VOID EOL
 %token TRUE FALSE
@@ -66,10 +67,10 @@ type_specifier
 
 
 compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
+	: FUN_ST FUN_EN
+	| FUN_ST statement_list FUN_EN
+	| FUN_ST declaration_list FUN_EN
+	| FUN_ST declaration_list statement_list FUN_EN
 	;
 
 expression_statement
@@ -196,6 +197,7 @@ declaration
 declaration_specifiers
 	: type_specifier
 	| type_specifier declaration_specifiers
+	;
 
 init_declarator_list
 	: init_declarator
@@ -205,6 +207,12 @@ init_declarator_list
 init_declarator
 	: declarator
 	| declarator '=' initializer
+	| declarator ':' initializer_list 
+	;
+
+initializer_list
+	: initializer
+	| initializer_list ',' initializer
 	;
 
 declarator
