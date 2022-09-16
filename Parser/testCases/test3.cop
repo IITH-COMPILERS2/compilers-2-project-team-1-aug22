@@ -1,8 +1,33 @@
-main->int
+Given an ellipse 2x^2 + y^2 = 11. Find the angle subtended by the point on the ellipse (1 , 3) on the focii.
+
+
+
+
+focal_chords : ellipse eqn , point p1 -> line_pair
 <<
-    int left = 21;
-    int right = 11;
-    int ans = left + right;
-    output : " Sum of left and right variables is " , ans;
-    exit : 0;
+    line_pair temp
+    if(on_curve(eqn , p1) == false)
+    <<
+        output : "The given point does not lie on the parabola."
+    >>
+    else 
+    <<
+        point p2 : focii1(parabola)
+        point p3 : focii2(parabola)
+        line l1 : 0, 0, 0, (p2.y - p1.y), (p1.x - p2.x), 2((p1.y*p2.x) - (p2.y*p1.x))
+        line l2 : 0, 0, 0, (p3.y - p1.y), (p1.x - p3.x), 2((p1.y*p3.x) - (p3.y*p1.x))
+        temp line_pair : 4*g(l1)*f(l2), 4*g(l1)*f(l2) + 4*f(l1)ga(l2), 4*f(l1)*f(l2), 2g(l1)*c(l2) + 2*c(l1)*g(l2) , 2*c(l1)*f(l2) + 2*f(l1)*c(l2), c(l1)*c(l2)
+    >>
+    exit : temp
+>>
+
+
+
+main -> int
+<<
+    ellipse eqn : 2, 0, 1, 0, 0, -11
+    point p : 1, 3
+    x = focal_chords(eqn , p)
+    ans = angle_(x)
+    output: “The angle subtended by the given point on the focii is:”, ans
 >>
