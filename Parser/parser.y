@@ -120,3 +120,127 @@ relational_expression
 	| relational_expression LE_OP additive_expression
 	| relational_expression GE_OP additive_expression
 	;
+
+additive_expression
+	: multiplicative_expression
+	| additive_expression '+' multiplicative_expression
+	| additive_expression '-' multiplicative_expression
+	;
+
+multiplicative_expression
+	: cast_expression
+	| multiplicative_expression '*' cast_expression
+	| multiplicative_expression '/' cast_expression
+	| multiplicative_expression '%' cast_expression
+	;
+
+cast_expression
+	: unary_expression
+	| '(' type_specifier ')' cast_expression
+	;
+
+unary_expression
+	: postfix_expression
+	| unary_operator cast_expression
+	;
+
+unary_operator
+	: '+'
+	| '-'
+	| '!'
+	;
+
+postfix_expression
+	: primary_expression
+	| postfix_expression '(' ')'
+	| postfix_expression '(' argument_expression_list ')'
+	;
+
+primary_expression
+	: IDENTIFIER
+	| INT_CONST
+	| FRAC_CONST
+	| DOUBLE_CONST
+	| STRING_LITERAL
+	| '(' expression ')'
+	;
+
+argument_expression_list
+	: assignment_expression
+	| argument_expression_list ',' assignment_expression
+	;
+
+statement_list
+	: statement
+	| statement_list statement
+	;
+
+statement
+	: compound_statement
+	| expression_statement
+	| selection_statement
+	| iteration_statement
+	| jump_statement
+	;
+
+declaration_list
+	: declaration
+	| declaration_list declaration
+	;
+
+declaration
+	: declaration_specifiers EOL
+	| declaration_specifiers init_declarator_list EOL
+	;
+
+declaration_specifiers
+	: type_specifier
+	| type_specifier declaration_specifiers
+
+init_declarator_list
+	: init_declarator
+	| init_declarator_list ',' init_declarator
+	;
+
+init_declarator
+	: declarator
+	| declarator '=' initializer
+	;
+
+declarator
+	: direct_declarator
+	;
+
+direct_declarator
+	: IDENTIFIER
+	| '(' declarator ')'
+	| direct_declarator '(' parameter_list ')'
+	| direct_declarator '(' identifier_list ')'
+	| direct_declarator '(' ')'							/* shift reduce conflict here similar to c lang */
+	;
+
+identifier_list
+	: IDENTIFIER
+	| identifier_list ',' IDENTIFIER
+	;
+
+initializer
+	: assignment_expression
+	;
+
+selection_statement
+	: IF '(' expression ')' statement
+	| IF '(' expression ')' statement ELSE statement 	/* shift reduce conflict here similar to c lang */
+	;
+
+iteration_statement
+	: LOOP '(' expression ')' statement
+	;
+
+jump_statement
+	: CONTINUE EOL
+	| BREAK EOL
+	| EXIT EOL
+	| EXIT expression EOL
+	;
+%%
