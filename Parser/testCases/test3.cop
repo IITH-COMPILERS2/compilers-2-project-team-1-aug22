@@ -1,0 +1,8 @@
+main->int
+<<
+    int left = 21;
+    int right = 11;
+    int ans = left + right;
+    output : " Sum of left and right variables is " , ans;
+    exit : 0;
+>>

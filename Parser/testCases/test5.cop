@@ -1,0 +1,7 @@
+main->int
+<<
+    conic eqn : 2 , 3 , 0 , -8 , -18 , 35
+    string con = conic_name(eqn)
+    output : " The given conic represents a " , con
+    exit : 0
+>>

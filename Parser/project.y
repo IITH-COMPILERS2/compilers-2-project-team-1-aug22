@@ -32,7 +32,7 @@
 		char *token; 
     };
     void printtree(struct node*);
-    void printInorder(struct node *);
+    void printPreorder(struct node *);
     struct node* mknode(struct node *left, struct node *right, char *token);
 
 %}
@@ -73,12 +73,12 @@
 %%
 
 translation_unit
-	: external_declaration { $$.nd = mknode(NULL, $1.nd, "external_declaration"); head = $$.nd; }
-	| translation_unit external_declaration { $2.nd = mknode(NULL, NULL, "external_declaration"); $$.nd = mknode($1.nd, $2.nd, "translation_unit"); head = $$.nd; }
+	: external_declaration { $$.nd = mknode(NULL, $1.nd, "TRANSLATION_UNIT"); head = $$.nd; }
+	| translation_unit external_declaration { $2.nd = mknode(NULL, NULL, "TRANSLATION_UNIT"); $$.nd = mknode($1.nd, $2.nd, "TRANSLATION_UNIT"); head = $$.nd; }
 	;
 
 external_declaration
-	: function_definition { $$.nd = mknode(NULL, $1.nd, "function_declaration"); }
+	: function_definition { $$.nd = mknode(NULL, $1.nd, "EXTERNAL_DECLR"); }
 	| declaration
 	;
 
@@ -91,12 +91,19 @@ function_definition
 
 parameter_list
 	:
-	| ':' parameters
+	| ':' parameters { $$.nd = mknode(NULL, $2.nd, "PARAMS_LIST"); }
 	;
 
 parameters
-	: type_specifier IDENTIFIER { add('V'); }
-	| parameters ',' type_specifier IDENTIFIER { add('V'); }
+	: type_specifier IDENTIFIER { add('V'); 
+			struct node* tp = mknode(NULL, NULL, $2.name);
+			$$.nd = mknode($1.nd, tp, "PARAMS");
+		}
+	| parameters ',' type_specifier IDENTIFIER { add('V'); 
+			struct node* tp = mknode(NULL, NULL, $4.name);
+			struct node* tp2 = mknode($3.nd, tp, "VARIABLES");
+			$$.nd = mknode($1.nd, tp2, "PARAMS");
+		}
 	;
 
 type_specifier
@@ -119,25 +126,28 @@ type_specifier
 
 
 compound_statement
-	: FUN_ST FUN_EN									//{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT")}
-	| FUN_ST statement_list FUN_EN					//{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT")}
-	| FUN_ST declaration_list FUN_EN				//{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT")}
-	| FUN_ST declaration_list statement_list FUN_EN //{$$.nd = mknode($2.nd, $3.nd, "COMPUND STATEMENT")}
+	: FUN_ST FUN_EN									{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT"); }
+	| FUN_ST statement_list FUN_EN					{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
+	| FUN_ST declaration_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
+	| FUN_ST declaration_list statement_list FUN_EN {$$.nd = mknode($2.nd, $3.nd, "COMPUND STATEMENT"); }
 	;
 
 expression_statement
 	: ';'
-	| expression ';'
+	| expression ';'	{$$.nd = mknode($1.nd, NULL, "EXPR_ST"); }
 	;
 
 expression
-	: assignment_expression
-	| expression ',' assignment_expression
+	: assignment_expression	{ $$.nd = mknode($1.nd, NULL, "EXPR"); }
+	| expression ',' assignment_expression { $$.nd = mknode($1.nd, $3.nd, "EXPR"); }
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression	{ $$.nd = mknode($1.nd, NULL, "ASS_EXPR"); }
+	| unary_expression assignment_operator assignment_expression { 
+			struct node* tp = mknode($1.nd, $2.nd, "UN_ASSGN");
+			$$.nd = mknode(tp, $3.nd, "ASS_EXPR");
+		}
 	;
 
 assignment_operator
@@ -147,54 +157,54 @@ assignment_operator
 	;
 
 conditional_expression
-	: logical_or_expression
+	: logical_or_expression { $$.nd = mknode($1.nd, NULL, "COND_EXPR"); }
 	;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
+	: logical_and_expression { $$.nd = mknode($1.nd, NULL, "LOGI_OR_EXPR"); }
+	| logical_or_expression OR_OP logical_and_expression { $$.nd = mknode($1.nd, $3.nd, "OR"); }
 	;
 
 logical_and_expression
-	: equality_expression
-	| logical_and_expression AND_OP equality_expression
+	: equality_expression { $$.nd = mknode($1.nd, NULL, "LOGI_AND_EXPR"); }
+	| logical_and_expression AND_OP equality_expression { $$.nd = mknode($1.nd, $3.nd, "AND"); }
 	;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	: relational_expression { $$.nd = mknode($1.nd, NULL, "EQ_EXPR"); }
+	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "="); }
+	| equality_expression NE_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "!="); }
 	;
 
 relational_expression
-	: additive_expression
-	| relational_expression '<' additive_expression
-	| relational_expression '>' additive_expression
-	| relational_expression LE_OP additive_expression
-	| relational_expression GE_OP additive_expression
+	: additive_expression	{ $$.nd = mknode($1.nd, NULL, "RELATIONAL_EXPR"); }
+	| relational_expression '<' additive_expression { $$.nd = mknode($1.nd, $3.nd, "<"); }
+	| relational_expression '>' additive_expression { $$.nd = mknode($1.nd, $3.nd, ">"); }
+	| relational_expression LE_OP additive_expression { $$.nd = mknode($1.nd, $3.nd, "<="); }
+	| relational_expression GE_OP additive_expression { $$.nd = mknode($1.nd, $3.nd, ">="); }
 	;
 
 additive_expression
-	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	: multiplicative_expression	{ $$.nd = mknode($1.nd, NULL, "ADDITIVE_EXPR"); }
+	| additive_expression '+' multiplicative_expression { $$.nd = mknode($1.nd, $3.nd, "+"); }
+	| additive_expression '-' multiplicative_expression { $$.nd = mknode($1.nd, $3.nd, "-"); }
 	;
 
 multiplicative_expression
-	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	: cast_expression { $$.nd = mknode($1.nd, NULL, "MUL_EXPR"); }
+	| multiplicative_expression '*' cast_expression { $$.nd = mknode($1.nd, $3.nd, "*"); }
+	| multiplicative_expression '/' cast_expression { $$.nd = mknode($1.nd, $3.nd, "/"); }
+	| multiplicative_expression '%' cast_expression { $$.nd = mknode($1.nd, $3.nd, "%"); }
 	;
 
 cast_expression
-	: unary_expression
-	| '(' type_specifier ')' cast_expression
+	: unary_expression { $$.nd = mknode($1.nd, NULL, "CAST_EXPR"); }
+	| '(' type_specifier ')' cast_expression { $$.nd = mknode($2.nd, $4.nd, "CAST_EXPR"); }
 	;
 
 unary_expression
-	: postfix_expression
-	| unary_operator cast_expression
+	: postfix_expression { $$.nd = mknode($1.nd, NULL, "UNARY_EXPR"); }
+	| unary_operator cast_expression { $$.nd = mknode($1.nd, $2.nd, "UNARY_EXPR"); }
 	;
 
 unary_operator
@@ -204,101 +214,104 @@ unary_operator
 	;
 
 postfix_expression
-	: primary_expression
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
+	: primary_expression { $$.nd = mknode($1.nd, NULL, "POSTFIX_EXPR"); }
+	| postfix_expression '(' ')' { $$.nd = mknode($1.nd, NULL, "POSTFIX_EXPR"); }
+	| postfix_expression '(' argument_expression_list ')' { $$.nd = mknode($1.nd, $3.nd, "POSTFIX_EXPR"); }
 	;
 
 primary_expression
-	: IDENTIFIER		 { add('V'); /*$$.nd = mknode(NULL, NULL, "IDENTIFIER");*/ }
-	| INT_CONST			 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
-	| FRAC_CONST		 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
-	| DOUBLE_CONST		 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
-	| STRING_LITERAL	 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
-	| '(' expression ')'
+	: IDENTIFIER		 { add('V'); $$.nd = mknode(NULL, NULL, $1.name); }
+	| INT_CONST			 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+	| FRAC_CONST		 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+	| DOUBLE_CONST		 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+	| STRING_LITERAL	 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+	| '(' expression ')' { $$.nd = mknode($2.nd, NULL, "PRIM_EXPR"); }
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	: assignment_expression { $$.nd = mknode($1.nd, NULL, "ARGU_EXPR_LIST"); }
+	| argument_expression_list ',' assignment_expression { $$.nd = mknode($1.nd, $3.nd, "ARGU_EXPR_LIST"); }
 	;
 
 statement_list
-	: statement
-	| statement_list statement
+	: statement { $$.nd = mknode($1.nd, NULL, "STAT_LIST"); }
+	| statement_list statement { $$.nd = mknode($1.nd, $2.nd, "STAT_LIST"); }
 	;
 
 statement
-	: compound_statement
-	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+	: compound_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| expression_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| selection_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| iteration_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| jump_statement		{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	;
 
 declaration_list
-	: declaration
-	| declaration_list declaration
+	: declaration					{ $$.nd = mknode($1.nd, NULL, "DECLR_LIST"); }
+	| declaration_list declaration	{ $$.nd = mknode($1.nd, $2.nd, "DECLR_LIST"); }
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
+	: declaration_specifiers ';'						{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
+	| declaration_specifiers init_declarator_list ';'	{ $$.nd = mknode($1.nd, $2.nd, "DECLR"); }
 	;
 
 declaration_specifiers
-	: type_specifier
-	| type_specifier declaration_specifiers
+	: type_specifier						{ $$.nd = mknode($1.nd, NULL, "DECLR_SPCIF"); }
+	| type_specifier declaration_specifiers	{ $$.nd = mknode($1.nd, $2.nd, "DECLR_SPCIF"); }
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator							{ $$.nd = mknode($1.nd, NULL, "INIT_DECLR_LIST"); }
+	| init_declarator_list ',' init_declarator	{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR_LIST"); }
 	;
 
 init_declarator
-	: declarator
-	| declarator '=' initializer
-	| declarator ':' initializer_list 
+	: declarator						{ $$.nd = mknode($1.nd, NULL, "INIT_DECLR"); }
+	| declarator '=' initializer		{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); }
+	| declarator ':' initializer_list 	{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); }
 	;
 
 initializer_list
-	: initializer
-	| initializer_list ',' initializer
+	: initializer						{ $$.nd = mknode($1.nd, NULL, "INIT_LIST"); }
+	| initializer_list ',' initializer	{ $$.nd = mknode($1.nd, $3.nd, "INIT_LIST"); }
 	;
 
 declarator
-	: direct_declarator
+	: direct_declarator					{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
 	;
 
 direct_declarator
-	: IDENTIFIER	{ add('V'); }
-	| '(' declarator ')'
-	| direct_declarator '(' parameter_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'							/* shift reduce conflict here similar to c lang */
+	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); }
+	| '(' declarator ')'						{ $$.nd = mknode($2.nd, NULL, "DIRECT_DECLR"); }
+	| direct_declarator '(' parameter_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
+	| direct_declarator '(' identifier_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
+	| direct_declarator '(' ')'					{ $$.nd = mknode($1.nd, NULL, "DIRECT_DECLR"); }			/* shift reduce conflict here similar to c lang */
 	;
 
 identifier_list
-	: IDENTIFIER	{ add('V'); }
-	| identifier_list ',' IDENTIFIER	{ add('V'); }
+	: IDENTIFIER	{ add('V'); }						{ $$.nd = mknode(NULL, NULL, $1.name); }
+	| identifier_list ',' IDENTIFIER	{ add('V'); }	{ $$.nd = mknode($1.nd, NULL, "IDEN_LIST"); }
 	;
 
 initializer
-	: assignment_expression
+	: assignment_expression				{ $$.nd = mknode($1.nd, NULL, "INITIALIZER"); }
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement 	/* shift reduce conflict here similar to c lang */
+	: IF '(' expression ')' statement					{ $$.nd = mknode($3.nd, $5.nd, "SELECT_STAT"); }
+	| IF '(' expression ')' statement ELSE statement 	{ 
+			struct node* tp = mknode($3.nd, $5.nd, "IF_STAT");
+			$$.nd = mknode(tp, $7.nd, "IF_ELSE_STAT"); 
+		}/* shift reduce conflict here similar to c lang */
 	;
 
 iteration_statement
-	: LOOP { add('K'); } '(' expression ')' statement
+	: LOOP { add('K'); } '(' expression ')' statement	{ $$.nd = mknode($4.nd, $6.nd, "ITER_STAT"); }
 	;
 
 jump_statement
-	: CONTINUE { add('K'); } ';'
+	: CONTINUE { add('K'); } ';' 
 	| BREAK { add('K'); } ';'
 	| EXIT { add('K'); } ';'
 	| EXIT { add('K'); } expression ';'
@@ -310,11 +323,11 @@ int main(int argc, char* argv[])
 	yyparse();
   	printf("\n\n");
 	printf("\t    SYMBOL TABLE \n\n");
-	printf("\nSYMBOL   DATATYPE   TYPE   LINE NUMBER \n");
-	printf("_______________________________________\n\n");
+	printf("\nSYMBOL\t\t\tDATATYPE\t\t\tTYPE\t\t\tLINE_NUMBER \n");
+	printf("___________________________________________________________________________________________\n\n");
 
 	for(int i = 0; i < count; i++) {
-		printf("%s\t%s\t%s\t%d\t\n", symbol_table[i].id_name, symbol_table[i].data_type, symbol_table[i].type, symbol_table[i].line_no);
+		printf("%s\t\t\t%s\t\t\t\t%s\t\t   %d\n", symbol_table[i].id_name, symbol_table[i].data_type, symbol_table[i].type, symbol_table[i].line_no);
 	}
 	for(int i=0;i<count;i++) {
 		free(symbol_table[i].id_name);
@@ -390,18 +403,18 @@ struct node* mknode(struct node *left, struct node *right, char *token) {
 }
 
 void printtree(struct node* tree) {
-	printf("\n\n Inorder traversal of the Parse Tree: \n\n");
-	printInorder(tree);
+	printf("\n\n Preorder traversal of the Parse Tree: \n\n");
+	printPreorder(tree);
 	printf("\n\n");
 }
 
-void printInorder(struct node *tree) {
+void printPreorder(struct node *tree) {
 	int i;
-	if (tree->left) {
-		printInorder(tree->left);
-	}
 	printf("%s, ", tree->token);
+	if (tree->left) {
+		printPreorder(tree->left);
+	}
 	if (tree->right) {
-		printInorder(tree->right);
+		printPreorder(tree->right);
 	}
 }

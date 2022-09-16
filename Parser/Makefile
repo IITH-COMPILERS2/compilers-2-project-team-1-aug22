@@ -3,6 +3,7 @@ Parser:
 	bison -o project.tab.c -vd project.y
 	gcc -o project project.lex.c project.tab.c -lm -ll
 	clear
+	./project < testCases/test1.cop
 	
 clean:
 	rm *.yy.c ||:
