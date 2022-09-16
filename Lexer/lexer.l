@@ -33,9 +33,7 @@ INT			[+-]?{D}+
 "string"				{ token_c(fp2); token_pr(fp2,"STRING"); }
 "long"					{ token_c(fp2); token_pr(fp2,"LONG"); }
 "frac"					{ token_c(fp2); token_pr(fp2,"FRAC"); }
-"exit"					{ token_c(fp2); token_pr(fp2,"EXIT"); }
-"struct"				{ token_c(fp2); token_pr(fp2,"STRUCT"); }        
-"typedef"				{ token_c(fp2); token_pr(fp2,"TYPEDEF"); }       
+"exit"					{ token_c(fp2); token_pr(fp2,"EXIT"); }      
 "void"					{ token_c(fp2); token_pr(fp2,"VOID"); }
 "loop"					{ token_c(fp2); token_pr(fp2,"LOOP"); }
 "input"					{ token_c(fp2); token_pr(fp2,"INPUT"); }
@@ -52,7 +50,6 @@ INT			[+-]?{D}+
 "ellipse"				{ token_c(fp2); token_pr(fp2,"ELLIPSE"); }
 "hyperbola"				{ token_c(fp2); token_pr(fp2,"HYPERBOLA"); }
 "main"					{ token_c(fp2); token_pr(fp2, "MAIN"); }
-
 
 {L}({L}|{D})*     				{ token_c(fp2); token_pr(fp2,"IDENTIFIER"); }
 {INT}\/({NZD}{D}*|0+{NZD}{D}*)	{ token_c(fp2); token_pr(fp2,"FRAC_CONST"); }
