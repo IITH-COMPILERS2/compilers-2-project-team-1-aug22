@@ -241,6 +241,6 @@ jump_statement
 	: CONTINUE EOL
 	| BREAK EOL
 	| EXIT EOL
-	| EXIT expression EOL
+	| EXIT expression EOL
 	;
 %%
