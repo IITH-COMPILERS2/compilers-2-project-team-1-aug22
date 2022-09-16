@@ -126,7 +126,8 @@ INT			[+-]?{D}+
 ","			    		{ token_c(fp2); token_pr(fp2,","); }
 ":"			    		{ token_c(fp2); token_pr(fp2,":"); }
 "->"					{ token_c(fp2); token_pr(fp2,"ARROW"); }
-"'"						{ token_c(fp2); token_pr(fp2,"FUNC_OP");}
+"{"						{ token_c(fp2); token_pr(fp2,"OP_BRAC");}
+"}"						{ token_c(fp2); token_pr(fp2,"CL_BRAC");}
 
 .			    		{ /* ignore bad characters */ }
 
