@@ -1,35 +1,46 @@
 %{
-    #include<stdio.h>
-    #include<string.h>
-    #include<stdlib.h>
-    #include<ctype.h>
-    #include"lex.yy.c"
+	#include <stdio.h>
+    #include <string.h>
+    #include <stdlib.h>
+    #include <ctype.h>
+    /*#include "project.lex.c"*/
     
+	extern char* yytext;
     void yyerror(const char *s);
     int yylex();
     int yywrap();
+    void add(char);
+    void insert_type();
+    int search(char *);
+
+    struct dataType {
+        char* id_name;
+        char* data_type;
+        char* type;
+        int line_no;
+    } symbol_table[10000];		/* see this */
+
+    int count=0;
+    int q;
+    char type[10];
+    extern int token_no;
+
 %}
+
+
 
 %token IDENTIFIER FRAC_CONST DOUBLE_CONST INT_CONST STRING_LITERAL
 %token ARROW LE_OP GE_OP EQ_OP NE_OP POW_OP
 %token AND_OP OR_OP MUL_ASSIGN ADD_ASSIGN
 %token FUN_ST FUN_EN
 
-%token STRING INT LONG BOOL FRAC DOUBLE VOID EOL
+%token STRING INT LONG BOOL FRAC DOUBLE VOID
 %token TRUE FALSE
 %token INPUT OUTPUT
 
 %token IF ELSE LOOP CONTINUE BREAK EXIT
 
 %token POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA
-%token MAIN
-%token EQ
-%token _A _B _H _G _F _C _DELTA ON_CURVE
-%token _X _Y SLOPE ACUTE_ANG_BISECS OBTUSE_ANG_BISECS ANGLE
-
-%token CENTRE TANGENT NORMAL RADIUS AREA
-%token FOCII DIRECT ECCEN P_AXIS VERTICES FOCAL_CHORD DOUBLE_ORDINATE LATUS_RECTUM INTERSEC_PT 
-%token LEN_MAJ_AXIS LEN_MIN_AXIS LATUS_RECTA FOCAL_RADII DIR_CIRCLE AUX_CIRCLE CIRCUMF TRANS_AXIS CONJ_AXIS ASYMPTOTES
 
 %start translation_unit
 
@@ -46,7 +57,7 @@ external_declaration
 	;
 
 function_definition
-    : IDENTIFIER parameter_list ARROW type_specifier compound_statement
+    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier compound_statement 
 	;
 
 parameter_list
@@ -55,26 +66,26 @@ parameter_list
 	;
 
 parameters
-	: type_specifier IDENTIFIER
-	| parameters ',' type_specifier IDENTIFIER
+	: type_specifier IDENTIFIER { add('V'); }
+	| parameters ',' type_specifier IDENTIFIER { add('V'); }
 	;
 
 type_specifier
-	: VOID
-	| BOOL
-	| STRING
-	| INT
-	| LONG
-	| DOUBLE
-	| FRAC
-	| POINT
-	| PARABOLA
-	| ELLIPSE
-	| HYPERBOLA
-	| CIRCLE
-	| CONIC
-	| LINE
-	| LINE_PAIR
+	: VOID		{ insert_type(); }
+	| BOOL		{ insert_type(); }
+	| STRING	{ insert_type(); }
+	| INT		{ insert_type(); }
+	| LONG		{ insert_type(); }				
+	| DOUBLE	{ insert_type(); }		
+	| FRAC		{ insert_type(); }		
+	| POINT		{ insert_type(); }		
+	| PARABOLA	{ insert_type(); }		
+	| ELLIPSE	{ insert_type(); }		
+	| HYPERBOLA	{ insert_type(); }		
+	| CIRCLE	{ insert_type(); }		
+	| CONIC		{ insert_type(); }		
+	| LINE		{ insert_type(); }		
+	| LINE_PAIR	{ insert_type(); }
 	;
 
 
@@ -86,8 +97,8 @@ compound_statement
 	;
 
 expression_statement
-	: EOL
-	| expression EOL
+	: ';'
+	| expression ';'
 	;
 
 expression
@@ -170,11 +181,11 @@ postfix_expression
 	;
 
 primary_expression
-	: IDENTIFIER
-	| INT_CONST
-	| FRAC_CONST
-	| DOUBLE_CONST
-	| STRING_LITERAL
+	: IDENTIFIER		 { add('V'); }
+	| INT_CONST			 { add('C'); }
+	| FRAC_CONST		 { add('C'); }
+	| DOUBLE_CONST		 { add('C'); }
+	| STRING_LITERAL	 { add('C'); }
 	| '(' expression ')'
 	;
 
@@ -202,8 +213,8 @@ declaration_list
 	;
 
 declaration
-	: declaration_specifiers EOL
-	| declaration_specifiers init_declarator_list EOL
+	: declaration_specifiers ';'
+	| declaration_specifiers init_declarator_list ';'
 	;
 
 declaration_specifiers
@@ -232,7 +243,7 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER
+	: IDENTIFIER	{ add('V'); }
 	| '(' declarator ')'
 	| direct_declarator '(' parameter_list ')'
 	| direct_declarator '(' identifier_list ')'
@@ -240,8 +251,8 @@ direct_declarator
 	;
 
 identifier_list
-	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
+	: IDENTIFIER	{ add('V'); }
+	| identifier_list ',' IDENTIFIER	{ add('V'); }
 	;
 
 initializer
@@ -254,13 +265,86 @@ selection_statement
 	;
 
 iteration_statement
-	: LOOP '(' expression ')' statement
+	: LOOP { add('K'); } '(' expression ')' statement
 	;
 
 jump_statement
-	: CONTINUE EOL
-	| BREAK EOL
-	| EXIT EOL
-	| EXIT expression EOL
+	: CONTINUE { add('K'); } ';'
+	| BREAK { add('K'); } ';'
+	| EXIT { add('K'); } ';'
+	| EXIT { add('K'); } expression ';'
 	;
 %%
+
+int main(int argc, char* argv[]) 
+{
+	yyparse();
+  	printf("\n\n");
+	printf("\t\t\t\t\t\t\t\t PHASE 1: LEXICAL ANALYSIS \n\n");
+	printf("\nSYMBOL   DATATYPE   TYPE   LINE NUMBER \n");
+	printf("_______________________________________\n\n");
+
+	for(int i = 0; i < count; i++) {
+		printf("%s\t%s\t%s\t%d\t\n", symbol_table[i].id_name, symbol_table[i].data_type, symbol_table[i].type, symbol_table[i].line_no);
+	}
+	for(int i=0;i<count;i++) {
+		free(symbol_table[i].id_name);
+		free(symbol_table[i].type);
+	}
+	printf("\n\n");
+}
+
+int search (char *type) {
+	for (int i = count - 1; i >= 0; i--) {
+		if(strcmp(symbol_table[i].id_name, type) == 0) {
+			return -1;
+			break;
+		}
+	}
+	return 0;
+}
+
+void add (char c) {
+  q = search(yytext);
+  if(!q) {
+    if(c == 'H') {
+			symbol_table[count].id_name = strdup(yytext);
+			symbol_table[count].data_type = strdup(type);
+			symbol_table[count].line_no = token_no;
+			symbol_table[count].type = strdup("Header");
+			count++;
+		}
+		else if(c == 'K') {
+			symbol_table[count].id_name = strdup(yytext);
+			symbol_table[count].data_type = strdup("N/A");
+			symbol_table[count].line_no = token_no;
+			symbol_table[count].type = strdup("Keyword\t");
+			count++;
+		}
+		else if(c == 'V') {
+			symbol_table[count].id_name = strdup(yytext);
+			symbol_table[count].data_type = strdup(type);
+			symbol_table[count].line_no = token_no;
+			symbol_table[count].type = strdup("Variable");
+			count++;
+		}
+		else if(c == 'C') {
+			symbol_table[count].id_name = strdup(yytext);
+			symbol_table[count].data_type = strdup("CONST");
+			symbol_table[count].line_no = token_no;
+			symbol_table[count].type = strdup("Constant");
+			count++;
+		}
+		else if(c == 'F') {
+			symbol_table[count].id_name = strdup(yytext);
+			symbol_table[count].data_type = strdup(type);
+			symbol_table[count].line_no = token_no;
+			symbol_table[count].type = strdup("Function");
+			count++;
+		}
+	}
+}
+
+void insert_type() {
+	strcpy(type, yytext);
+}

@@ -1,5 +1,7 @@
-LEXER:
-	yacc parser.y
+Parser:
+	flex -o project.lex.c project.l
+	bison -o project.tab.c -vd project.y
+	gcc -o project project.lex.c project.tab.c -lm -ll
 	
 clean:
 	rm *.yy.c ||:
@@ -7,3 +9,6 @@ clean:
 	rm -rf outputs ||:
 	rm *.tab.c ||:
 	rm *.tab.h ||:
+	rm *.output ||:
+	rm project ||:
+	rm *.lex.c ||:
