@@ -53,45 +53,6 @@ INT			[+-]?{D}+
 "hyperbola"				{ token_c(fp2); token_pr(fp2,"HYPERBOLA"); }
 "main"					{ token_c(fp2); token_pr(fp2, "MAIN"); }
 
-"eq"					{ token_c(fp2); token_pr(fp2, "EQUATION"); }
-"_a"					{ token_c(fp2); token_pr(fp2,"A"); }
-"_b"					{ token_c(fp2); token_pr(fp2,"B"); }
-"_h"					{ token_c(fp2); token_pr(fp2,"H"); }
-"_g"					{ token_c(fp2); token_pr(fp2,"G"); }
-"_f"					{ token_c(fp2); token_pr(fp2,"F"); }
-"_c"					{ token_c(fp2); token_pr(fp2,"C"); }
-"_delta"				{ token_c(fp2); token_pr(fp2,"DELTA"); }
-"on_curve"				{ token_c(fp2); token_pr(fp2,"ON_CURVE"); }
-"_x"					{ token_c(fp2); token_pr(fp2,"X"); }
-"_y"					{ token_c(fp2); token_pr(fp2,"Y"); }
-"slope"					{ token_c(fp2); token_pr(fp2,"SLOPE"); }
-"acute_ang_bisecs"		{ token_c(fp2); token_pr(fp2,"ACUTE_ANG_BISECS"); }
-"obtuse_ang_bisecs"		{ token_c(fp2); token_pr(fp2,"OBTUSE_ANG_BISECS"); }
-"angle"					{ token_c(fp2); token_pr(fp2,"ANGLE"); }
-"centre"				{ token_c(fp2); token_pr(fp2,"CENTER"); }
-"tangent"				{ token_c(fp2); token_pr(fp2,"TANGENT"); }
-"normal"				{ token_c(fp2); token_pr(fp2,"NORMAL"); }
-"radius"				{ token_c(fp2); token_pr(fp2,"RADIUS"); }
-"area"					{ token_c(fp2); token_pr(fp2,"AREA"); }
-"focii"					{ token_c(fp2); token_pr(fp2,"FOCII"); }
-"direct"				{ token_c(fp2); token_pr(fp2,"DIRECT"); }
-"eccen"					{ token_c(fp2); token_pr(fp2,"ECCEN"); }
-"p_axis"				{ token_c(fp2); token_pr(fp2,"P_AXIS"); }
-"vertices"				{ token_c(fp2); token_pr(fp2,"VERTICES"); }
-"focal_chord"			{ token_c(fp2); token_pr(fp2,"FOCAL_CHORD"); }
-"double_ordinate"		{ token_c(fp2); token_pr(fp2,"DOUBLE_ORDINATE"); }
-"latus_rectum"			{ token_c(fp2); token_pr(fp2,"LATUS_RECTUM"); }
-"intersec_pt"			{ token_c(fp2); token_pr(fp2,"INTERSEC_PT"); }
-"len_maj_axis"			{ token_c(fp2); token_pr(fp2,"LEN_MAJ_AXIS"); }
-"len_min_axis"			{ token_c(fp2); token_pr(fp2,"LEN_MIN_AXIS"); }
-"latus_recta"			{ token_c(fp2); token_pr(fp2,"LATUS_RECTA"); }
-"focal_radii"			{ token_c(fp2); token_pr(fp2,"FOCAL_RADII"); }
-"dir_circle"			{ token_c(fp2); token_pr(fp2,"DIR_CIRCLE"); }
-"aux_circle"			{ token_c(fp2); token_pr(fp2,"AUX_CIRCLE"); }
-"circumf"				{ token_c(fp2); token_pr(fp2,"CIRCUMF"); }
-"trans_axis"			{ token_c(fp2); token_pr(fp2,"TRANS_AXIS"); }
-"conj_axis"				{ token_c(fp2); token_pr(fp2,"CONJ_AXIS"); }
-"asymptotes"			{ token_c(fp2); token_pr(fp2,"ASYMPTOTES"); }
 
 {L}({L}|{D})*     				{ token_c(fp2); token_pr(fp2,"IDENTIFIER"); }
 {INT}\/({NZD}{D}*|0+{NZD}{D}*)	{ token_c(fp2); token_pr(fp2,"FRAC_CONST"); }
