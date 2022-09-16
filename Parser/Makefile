@@ -2,6 +2,7 @@ Parser:
 	flex -o project.lex.c project.l
 	bison -o project.tab.c -vd project.y
 	gcc -o project project.lex.c project.tab.c -lm -ll
+	clear
 	
 clean:
 	rm *.yy.c ||:

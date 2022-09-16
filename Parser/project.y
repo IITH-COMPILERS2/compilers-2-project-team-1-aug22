@@ -24,12 +24,29 @@
     int q;
     char type[10];
     extern int token_no;
+	
+	struct node *head;
+    struct node {
+		struct node *left; 
+		struct node *right; 
+		char *token; 
+    };
+    void printtree(struct node*);
+    void printInorder(struct node *);
+    struct node* mknode(struct node *left, struct node *right, char *token);
 
 %}
 
+%union { 
+	struct var_name { 
+		char name[100]; 
+		struct node* nd;
+	} nd_obj; 
+} 
 
 
-%token IDENTIFIER FRAC_CONST DOUBLE_CONST INT_CONST STRING_LITERAL
+
+%token <nd_obj> IDENTIFIER FRAC_CONST DOUBLE_CONST INT_CONST STRING_LITERAL
 %token ARROW LE_OP GE_OP EQ_OP NE_OP POW_OP
 %token AND_OP OR_OP MUL_ASSIGN ADD_ASSIGN
 %token FUN_ST FUN_EN
@@ -42,22 +59,34 @@
 
 %token POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA
 
+%type <nd_obj> translation_unit external_declaration function_definition parameter_list parameters type_specifier 
+  compound_statement expression_statement expression assignment_expression
+  assignment_operator conditional_expression logical_or_expression logical_and_expression
+  equality_expression relational_expression additive_expression multiplicative_expression
+  cast_expression unary_expression unary_operator postfix_expression primary_expression
+  argument_expression_list statement_list statement declaration_list declaration 
+  declaration_specifiers init_declarator_list init_declarator initializer_list declarator
+  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement
+
 %start translation_unit
 
 %%
 
 translation_unit
-	: external_declaration
-	| translation_unit external_declaration
+	: external_declaration { $$.nd = mknode(NULL, $1.nd, "external_declaration"); head = $$.nd; }
+	| translation_unit external_declaration { $2.nd = mknode(NULL, NULL, "external_declaration"); $$.nd = mknode($1.nd, $2.nd, "translation_unit"); head = $$.nd; }
 	;
 
 external_declaration
-	: function_definition
+	: function_definition { $$.nd = mknode(NULL, $1.nd, "function_declaration"); }
 	| declaration
 	;
 
 function_definition
-    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier compound_statement 
+    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier compound_statement { 
+		struct node* tp = mknode($3.nd, $5.nd, "OPTIONS");
+		$$.nd = mknode(tp, $6.nd, $1.name); 
+		} 
 	;
 
 parameter_list
@@ -90,10 +119,10 @@ type_specifier
 
 
 compound_statement
-	: FUN_ST FUN_EN
-	| FUN_ST statement_list FUN_EN
-	| FUN_ST declaration_list FUN_EN
-	| FUN_ST declaration_list statement_list FUN_EN
+	: FUN_ST FUN_EN									//{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT")}
+	| FUN_ST statement_list FUN_EN					//{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT")}
+	| FUN_ST declaration_list FUN_EN				//{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT")}
+	| FUN_ST declaration_list statement_list FUN_EN //{$$.nd = mknode($2.nd, $3.nd, "COMPUND STATEMENT")}
 	;
 
 expression_statement
@@ -181,11 +210,11 @@ postfix_expression
 	;
 
 primary_expression
-	: IDENTIFIER		 { add('V'); }
-	| INT_CONST			 { add('C'); }
-	| FRAC_CONST		 { add('C'); }
-	| DOUBLE_CONST		 { add('C'); }
-	| STRING_LITERAL	 { add('C'); }
+	: IDENTIFIER		 { add('V'); /*$$.nd = mknode(NULL, NULL, "IDENTIFIER");*/ }
+	| INT_CONST			 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
+	| FRAC_CONST		 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
+	| DOUBLE_CONST		 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
+	| STRING_LITERAL	 { add('C'); /*$$.nd = mknode(NULL, NULL, $1.name);*/ }
 	| '(' expression ')'
 	;
 
@@ -280,7 +309,7 @@ int main(int argc, char* argv[])
 {
 	yyparse();
   	printf("\n\n");
-	printf("\t\t\t\t\t\t\t\t PHASE 1: LEXICAL ANALYSIS \n\n");
+	printf("\t    SYMBOL TABLE \n\n");
 	printf("\nSYMBOL   DATATYPE   TYPE   LINE NUMBER \n");
 	printf("_______________________________________\n\n");
 
@@ -292,6 +321,7 @@ int main(int argc, char* argv[])
 		free(symbol_table[i].type);
 	}
 	printf("\n\n");
+	printtree(head);
 }
 
 int search (char *type) {
@@ -347,4 +377,31 @@ void add (char c) {
 
 void insert_type() {
 	strcpy(type, yytext);
+}
+
+struct node* mknode(struct node *left, struct node *right, char *token) {	
+	struct node *newnode = (struct node *)malloc(sizeof(struct node));
+	char *newstr = (char *)malloc(strlen(token)+1);
+	strcpy(newstr, token);
+	newnode->left = left;
+	newnode->right = right;
+	newnode->token = newstr;
+	return(newnode);
+}
+
+void printtree(struct node* tree) {
+	printf("\n\n Inorder traversal of the Parse Tree: \n\n");
+	printInorder(tree);
+	printf("\n\n");
+}
+
+void printInorder(struct node *tree) {
+	int i;
+	if (tree->left) {
+		printInorder(tree->left);
+	}
+	printf("%s, ", tree->token);
+	if (tree->right) {
+		printInorder(tree->right);
+	}
 }

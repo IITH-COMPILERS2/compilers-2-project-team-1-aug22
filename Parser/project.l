@@ -14,77 +14,77 @@ INT			[+-]?{D}+
 
 		void comment();
 		void token_c(FILE* fp);
-		int token_no = 0;
+		int token_no = 1;
 		FILE *fp2;
 %}
 
 %%
 #			    		{ }
 [\n]					{ token_no++;}
-";"						{ return(';'); }
-break					{ return(BREAK); }
-continue				{ return(CONTINUE); }
-else					{ return(ELSE); }
-if						{ return(IF); }
-int						{ return(INT); }
-double					{ return(DOUBLE); }
-bool					{ return(BOOL); }
-string					{ return(STRING); }
-long					{ return(LONG); }
-frac					{ return(FRAC); }
-exit					{ return(EXIT); }      
-void					{ return(VOID); }
-loop					{ return(LOOP); }
-input					{ return(INPUT); }
-output					{ return(OUTPUT); }   
-true		     		{ return(TRUE); }
-false					{ return(FALSE); }
+";"						{ strcpy(yylval.nd_obj.name,(yytext)); return(';'); }
+break					{ strcpy(yylval.nd_obj.name,(yytext)); return(BREAK); }
+continue				{ strcpy(yylval.nd_obj.name,(yytext)); return(CONTINUE); }
+else					{ strcpy(yylval.nd_obj.name,(yytext)); return(ELSE); }
+if						{ strcpy(yylval.nd_obj.name,(yytext)); return(IF); }
+int						{ strcpy(yylval.nd_obj.name,(yytext)); return(INT); }
+double					{ strcpy(yylval.nd_obj.name,(yytext)); return(DOUBLE); }
+bool					{ strcpy(yylval.nd_obj.name,(yytext)); return(BOOL); }
+string					{ strcpy(yylval.nd_obj.name,(yytext)); return(STRING); }
+long					{ strcpy(yylval.nd_obj.name,(yytext)); return(LONG); }
+frac					{ strcpy(yylval.nd_obj.name,(yytext)); return(FRAC); }
+exit					{ strcpy(yylval.nd_obj.name,(yytext)); return(EXIT); }      
+void					{ strcpy(yylval.nd_obj.name,(yytext)); return(VOID); }
+loop					{ strcpy(yylval.nd_obj.name,(yytext)); return(LOOP); }
+input					{ strcpy(yylval.nd_obj.name,(yytext)); return(INPUT); }
+output					{ strcpy(yylval.nd_obj.name,(yytext)); return(OUTPUT); }   
+true		     		{ strcpy(yylval.nd_obj.name,(yytext)); return(TRUE); }
+false					{ strcpy(yylval.nd_obj.name,(yytext)); return(FALSE); }
 
-point					{ return(POINT); }
-line					{ return(LINE); }
-conic					{ return(CONIC); }
-line_pair				{ return(LINE_PAIR); }
-circle					{ return(CIRCLE); }
-parabola				{ return(PARABOLA); }
-ellipse					{ return(ELLIPSE); }
-hyperbola				{ return(HYPERBOLA); }
+point					{ strcpy(yylval.nd_obj.name,(yytext)); return(POINT); }
+line					{ strcpy(yylval.nd_obj.name,(yytext)); return(LINE); }
+conic					{ strcpy(yylval.nd_obj.name,(yytext)); return(CONIC); }
+line_pair				{ strcpy(yylval.nd_obj.name,(yytext)); return(LINE_PAIR); }
+circle					{ strcpy(yylval.nd_obj.name,(yytext)); return(CIRCLE); }
+parabola				{ strcpy(yylval.nd_obj.name,(yytext)); return(PARABOLA); }
+ellipse					{ strcpy(yylval.nd_obj.name,(yytext)); return(ELLIPSE); }
+hyperbola				{ strcpy(yylval.nd_obj.name,(yytext)); return(HYPERBOLA); }
 
 
-{L}({L}|{D})*     		{ return(IDENTIFIER); }
-{INT}\/({NZD}{D}*|0+{NZD}{D}*)		{ return(FRAC_CONST); }
-{DEC}		  			{ return(DOUBLE_CONST); }
-{INT}					{ return(INT_CONST); }
-\"([^\\\"]|\\.)*\"		{ return(STRING_LITERAL); }
+{L}({L}|{D})*     		{ strcpy(yylval.nd_obj.name,(yytext)); return(IDENTIFIER); }
+{INT}\/({NZD}{D}*|0+{NZD}{D}*)		{ strcpy(yylval.nd_obj.name,(yytext)); return(FRAC_CONST); }
+{DEC}		  			{ strcpy(yylval.nd_obj.name,(yytext)); return(DOUBLE_CONST); }
+{INT}					{ strcpy(yylval.nd_obj.name,(yytext)); return(INT_CONST); }
+\"([^\\\"]|\\.)*\"		{ strcpy(yylval.nd_obj.name,(yytext)); return(STRING_LITERAL); }
 
-"( "           			{ return('('); }
-")"             		{ return(')'); }
-". "           			{ return('.'); }
-"!"             		{ return('!'); }
-"^ "            		{ return('^'); }
+"( "           			{ strcpy(yylval.nd_obj.name,(yytext)); return('('); }
+")"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(')'); }
+". "           			{ strcpy(yylval.nd_obj.name,(yytext)); return('.'); }
+"!"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('!'); }
+"^ "            		{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
 
-"*"            			{ return('*');}
-"/ "           			{ return('/');}
-"+ "            		{ return('+');}
-"-"             		{ return( '-');}
-"^^"             		{ return( POW_OP); }
-"== "           		{ return( EQ_OP);}
+"*"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('*');}
+"/ "           			{ strcpy(yylval.nd_obj.name,(yytext)); return('/');}
+"+ "            		{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
+"-"             		{ strcpy(yylval.nd_obj.name,(yytext)); return( '-');}
+"^^"             		{ strcpy(yylval.nd_obj.name,(yytext)); return( POW_OP); }
+"== "           		{ strcpy(yylval.nd_obj.name,(yytext)); return( EQ_OP);}
 
-"&&"					{ return(AND_OP); }
-"||"					{ return(OR_OP); }
-"="			    		{ return('='); }
-"+="					{ return(ADD_ASSIGN); }
-"*="					{ return(MUL_ASSIGN); }
+"&&"					{ strcpy(yylval.nd_obj.name,(yytext)); return(AND_OP); }
+"||"					{ strcpy(yylval.nd_obj.name,(yytext)); return(OR_OP); }
+"="			    		{ strcpy(yylval.nd_obj.name,(yytext)); return('='); }
+"+="					{ strcpy(yylval.nd_obj.name,(yytext)); return(ADD_ASSIGN); }
+"*="					{ strcpy(yylval.nd_obj.name,(yytext)); return(MUL_ASSIGN); }
 
-"<="					{ return(LE_OP); }
-">="					{ return(GE_OP); }
-"!="					{ return(NE_OP); }
-"<"			    		{ return('<'); }
-">"			    		{ return('>'); }
-","			    		{ return(','); }
-":"			    		{ return(':'); }
-"->"					{ return(ARROW); }
-"<<"					{ return(FUN_ST);}
-">>"					{ return(FUN_EN);}
+"<="					{ strcpy(yylval.nd_obj.name,(yytext)); return(LE_OP); }
+">="					{ strcpy(yylval.nd_obj.name,(yytext)); return(GE_OP); }
+"!="					{ strcpy(yylval.nd_obj.name,(yytext)); return(NE_OP); }
+"<"			    		{ strcpy(yylval.nd_obj.name,(yytext)); return('<'); }
+">"			    		{ strcpy(yylval.nd_obj.name,(yytext)); return('>'); }
+","			    		{ strcpy(yylval.nd_obj.name,(yytext)); return(','); }
+":"			    		{ strcpy(yylval.nd_obj.name,(yytext)); return(':'); }
+"->"					{ strcpy(yylval.nd_obj.name,(yytext)); return(ARROW); }
+"<<"					{ strcpy(yylval.nd_obj.name,(yytext)); return(FUN_ST);}
+">>"					{ strcpy(yylval.nd_obj.name,(yytext)); return(FUN_EN);}
 
 .			    		{ /* ignore bad characters */ }
 
