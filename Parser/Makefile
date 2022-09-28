@@ -5,6 +5,7 @@ Parser:
 	clear
 	./project < testCases/test1.cop
 	./project < testCases/test2.cop
+	./project < testCases/test3.cop
 	
 clean:
 	rm *.yy.c ||:
