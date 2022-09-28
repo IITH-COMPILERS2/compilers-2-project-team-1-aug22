@@ -172,7 +172,7 @@ logical_and_expression
 
 equality_expression
 	: relational_expression { $$.nd = mknode($1.nd, NULL, "EQ_EXPR"); }
-	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "="); }
+	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "=="); }
 	| equality_expression NE_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "!="); }
 	;
 
