@@ -128,8 +128,6 @@ type_specifier
 compound_statement
 	: FUN_ST FUN_EN									{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT"); }
 	| FUN_ST statement_list FUN_EN					{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
-	| FUN_ST declaration_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
-	| FUN_ST declaration_list statement_list FUN_EN {$$.nd = mknode($2.nd, $3.nd, "COMPUND STATEMENT"); }
 	;
 
 expression_statement
@@ -172,7 +170,7 @@ logical_and_expression
 
 equality_expression
 	: relational_expression { $$.nd = mknode($1.nd, NULL, "EQ_EXPR"); }
-	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "=="); }
+	| equality_expression EQ_OP { add('K'); } relational_expression { $$.nd = mknode($1.nd, $4.nd, "=="); }
 	| equality_expression NE_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "!="); }
 	;
 
@@ -239,7 +237,8 @@ statement_list
 	;
 
 statement
-	: compound_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	: declaration			{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| compound_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	| expression_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	| selection_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	| iteration_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
@@ -299,10 +298,10 @@ initializer
 	;
 
 selection_statement
-	: IF '(' expression ')' statement					{ $$.nd = mknode($3.nd, $5.nd, "SELECT_STAT"); }
-	| IF '(' expression ')' statement ELSE statement 	{ 
-			struct node* tp = mknode($3.nd, $5.nd, "IF_STAT");
-			$$.nd = mknode(tp, $7.nd, "IF_ELSE_STAT"); 
+	: IF { add('K'); } '(' expression ')' statement					{ $$.nd = mknode($4.nd, $6.nd, "SELECT_STAT"); }
+	| IF { add('K'); } '(' expression ')' statement ELSE statement 	{ 
+			struct node* tp = mknode($4.nd, $6.nd, "IF_STAT");
+			$$.nd = mknode(tp, $8.nd, "IF_ELSE_STAT"); 
 		}/* shift reduce conflict here similar to c lang */
 	;
 

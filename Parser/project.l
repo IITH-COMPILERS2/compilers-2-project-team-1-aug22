@@ -56,18 +56,18 @@ hyperbola				{ strcpy(yylval.nd_obj.name,(yytext)); return(HYPERBOLA); }
 {INT}					{ strcpy(yylval.nd_obj.name,(yytext)); return(INT_CONST); }
 \"([^\\\"]|\\.)*\"		{ strcpy(yylval.nd_obj.name,(yytext)); return(STRING_LITERAL); }
 
-"( "           			{ strcpy(yylval.nd_obj.name,(yytext)); return('('); }
+"("           			{ strcpy(yylval.nd_obj.name,(yytext)); return('('); }
 ")"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(')'); }
-". "           			{ strcpy(yylval.nd_obj.name,(yytext)); return('.'); }
+"."           			{ strcpy(yylval.nd_obj.name,(yytext)); return('.'); }
 "!"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('!'); }
-"^ "            		{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
+"^"            		{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
 
 "*"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('*');}
-"/ "           			{ strcpy(yylval.nd_obj.name,(yytext)); return('/');}
-"+ "            		{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
-"-"             		{ strcpy(yylval.nd_obj.name,(yytext)); return( '-');}
-"^^"             		{ strcpy(yylval.nd_obj.name,(yytext)); return( POW_OP); }
-"== "           		{ strcpy(yylval.nd_obj.name,(yytext)); return( EQ_OP);}
+"/"           			{ strcpy(yylval.nd_obj.name,(yytext)); return('/');}
+"+"            		{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
+"-"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('-');}
+"^^"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(POW_OP); }
+"=="           		{ strcpy(yylval.nd_obj.name,(yytext)); return(EQ_OP);}
 
 "&&"					{ strcpy(yylval.nd_obj.name,(yytext)); return(AND_OP); }
 "||"					{ strcpy(yylval.nd_obj.name,(yytext)); return(OR_OP); }
