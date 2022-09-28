@@ -3,8 +3,8 @@ NZD         [1-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]                             
 E			[Ee][+-]?{D}+
-DEC 		[+-]?{D}+[.]{D}+
-INT			[+-]?{D}+	
+DEC 		{D}+[.]{D}+
+INT			{D}+	
 
 %{
 		#include <stdio.h>
