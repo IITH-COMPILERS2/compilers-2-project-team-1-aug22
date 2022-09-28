@@ -4,6 +4,7 @@ Parser:
 	gcc -o project project.lex.c project.tab.c -lm -ll
 	clear
 	./project < testCases/test1.cop
+	./project < testCases/test2.cop
 	
 clean:
 	rm *.yy.c ||:
