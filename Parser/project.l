@@ -19,9 +19,9 @@ INT			{D}+
 %}
 
 %%
+" "						{ }
 #			    		{ comment();}
-[\n]					{ token_no++;}
-";"						{ strcpy(yylval.nd_obj.name,(yytext)); return(';'); }
+\n						{ strcpy(yylval.nd_obj.name,(yytext)); return(EOL); }
 break					{ strcpy(yylval.nd_obj.name,(yytext)); return(BREAK); }
 continue				{ strcpy(yylval.nd_obj.name,(yytext)); return(CONTINUE); }
 else					{ strcpy(yylval.nd_obj.name,(yytext)); return(ELSE); }

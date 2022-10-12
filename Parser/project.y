@@ -51,7 +51,7 @@
 %token AND_OP OR_OP MUL_ASSIGN ADD_ASSIGN
 %token FUN_ST FUN_EN
 
-%token STRING INT LONG BOOL FRAC DOUBLE VOID
+%token STRING INT LONG BOOL FRAC DOUBLE VOID EOL
 %token TRUE FALSE
 %token INPUT OUTPUT
 
@@ -83,9 +83,9 @@ external_declaration
 	;
 
 function_definition
-    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier compound_statement { 
+    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier EOL compound_statement { 
 		struct node* tp = mknode($3.nd, $5.nd, "OPTIONS");
-		$$.nd = mknode(tp, $6.nd, $1.name); 
+		$$.nd = mknode(tp, $7.nd, $1.name); 
 		} 
 	;
 
@@ -126,13 +126,13 @@ type_specifier
 
 
 compound_statement
-	: FUN_ST FUN_EN									{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT"); }
-	| FUN_ST statement_list FUN_EN					{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
+	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT"); }
+	| FUN_ST statement_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
 	;
 
 expression_statement
-	: ';'
-	| expression ';'	{$$.nd = mknode($1.nd, NULL, "EXPR_ST"); }
+	: EOL
+	| expression EOL	{$$.nd = mknode($1.nd, NULL, "EXPR_ST"); }
 	;
 
 expression
@@ -170,7 +170,7 @@ logical_and_expression
 
 equality_expression
 	: relational_expression { $$.nd = mknode($1.nd, NULL, "EQ_EXPR"); }
-	| equality_expression EQ_OP { add('K'); } relational_expression { $$.nd = mknode($1.nd, $4.nd, "=="); }
+	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "=="); }
 	| equality_expression NE_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "!="); }
 	;
 
@@ -232,16 +232,16 @@ argument_expression_list
 	;
 
 statement_list
-	: statement { $$.nd = mknode($1.nd, NULL, "STAT_LIST"); }
+	: statement	{ $$.nd = mknode($1.nd, NULL, "STAT_LIST"); }
 	| statement_list statement { $$.nd = mknode($1.nd, $2.nd, "STAT_LIST"); }
 	;
 
 statement
 	: declaration			{ $$.nd = mknode($1.nd, NULL, "STAT"); }
-	| compound_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
-	| expression_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
-	| selection_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
-	| iteration_statement 	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| compound_statement	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| expression_statement	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| selection_statement	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| iteration_statement	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	| jump_statement		{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	;
 
@@ -251,8 +251,8 @@ declaration_list
 	;
 
 declaration
-	: declaration_specifiers ';'						{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
-	| declaration_specifiers init_declarator_list ';'	{ $$.nd = mknode($1.nd, $2.nd, "DECLR"); }
+	: declaration_specifiers EOL						{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
+	| declaration_specifiers init_declarator_list EOL	{ $$.nd = mknode($1.nd, $2.nd, "DECLR"); }
 	;
 
 declaration_specifiers
@@ -298,22 +298,22 @@ initializer
 	;
 
 selection_statement
-	: IF { add('K'); } '(' expression ')' statement					{ $$.nd = mknode($4.nd, $6.nd, "SELECT_STAT"); }
-	| IF { add('K'); } '(' expression ')' statement ELSE statement 	{ 
-			struct node* tp = mknode($4.nd, $6.nd, "IF_STAT");
-			$$.nd = mknode(tp, $8.nd, "IF_ELSE_STAT"); 
+	: IF { add('K'); } '(' expression ')' EOL compound_statement					{ $$.nd = mknode($4.nd, $7.nd, "SELECT_STAT"); }
+	| IF { add('K'); } '(' expression ')' EOL compound_statement ELSE statement 	{ 
+			struct node* tp = mknode($4.nd, $7.nd, "IF_STAT");
+			$$.nd = mknode(tp, $9.nd, "IF_ELSE_STAT"); 
 		}/* shift reduce conflict here similar to c lang */
 	;
 
 iteration_statement
-	: LOOP { add('K'); } '(' expression ')' statement	{ $$.nd = mknode($4.nd, $6.nd, "ITER_STAT"); }
+	: LOOP { add('K'); } '(' expression ')' EOL compound_statement	{ $$.nd = mknode($4.nd, $7.nd, "ITER_STAT"); }
 	;
 
 jump_statement
-	: CONTINUE { add('K'); } ';' 
-	| BREAK { add('K'); } ';'
-	| EXIT { add('K'); } ';'
-	| EXIT { add('K'); } expression ';'
+	: CONTINUE { add('K'); } EOL 
+	| BREAK { add('K'); } EOL
+	| EXIT { add('K'); } EOL
+	| EXIT { add('K'); } expression EOL
 	;
 %%
 

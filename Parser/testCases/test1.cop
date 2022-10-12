@@ -1,6 +1,15 @@
-main -> int
+main->int
 <<
-    int a = 10;
-    int b = 5;
-    int c = a + b;
+    int a,b,c=0
+    a=a+2
+    loop(a==2)
+    <<
+        j+=3
+    >>
+    if(b==3)
+    <<d*=5
+        k+=4
+    >>
+    int c
+    c=c*5
 >>
