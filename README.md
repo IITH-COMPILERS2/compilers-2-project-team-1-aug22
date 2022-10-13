@@ -1,7 +1,9 @@
 # **`CoPro`**
 Domain specific language designed to solve complex **conic section problems**.
-## **`Lexer`**
 
-## **`Parser`**
+In this project every section has sepearte folder and each section has its own code.
+## **[`Lexer`](./Lexer/)**
 
-## **`Semantics`**
+## **[`Parser`](./Parser/)**
+
+## **[`Semantics`](./Semantics/)**
