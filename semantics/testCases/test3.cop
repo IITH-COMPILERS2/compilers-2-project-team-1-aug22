@@ -1,8 +1,0 @@
-main->int 
-<<
-    int a = 1, b = 1
-    int c = a + b
-    int d = a - b
-    int e = a * b
-    int f = a / b
->>
