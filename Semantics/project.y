@@ -1,8 +1,10 @@
 %{
+	#include <bits/stdc++.h>
 	#include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
     #include <ctype.h>
+	using namespace std;
     /*#include "project.lex.c"*/
     
 	extern char* yytext;
@@ -20,7 +22,7 @@
         int line_no;
     } symbol_table[10000];		/* see this */
 
-    int count=0;
+    int Count=0;
     int q;
     char type[10];
     extern int token_no;
@@ -33,7 +35,7 @@
     };
     void printtree(struct node*);
     void printPreorder(struct node *);
-    struct node* mknode(struct node *left, struct node *right, char *token);
+    struct node* mknode(struct node *left, struct node *right, const char *token);
 
 %}
 
@@ -325,10 +327,10 @@ int main(int argc, char* argv[])
 	printf("\nSYMBOL\t\t\tDATATYPE\t\t\tTYPE\t\t\tLINE_NUMBER \n");
 	printf("___________________________________________________________________________________________\n\n");
 
-	for(int i = 0; i < count; i++) {
+	for(int i = 0; i < Count; i++) {
 		printf("%s\t\t\t%s\t\t\t\t%s\t\t   %d\n", symbol_table[i].id_name, symbol_table[i].data_type, symbol_table[i].type, symbol_table[i].line_no);
 	}
-	for(int i=0;i<count;i++) {
+	for(int i=0;i<Count;i++) {
 		free(symbol_table[i].id_name);
 		free(symbol_table[i].type);
 	}
@@ -337,7 +339,7 @@ int main(int argc, char* argv[])
 }
 
 int search (char *type) {
-	for (int i = count - 1; i >= 0; i--) {
+	for (int i = Count - 1; i >= 0; i--) {
 		if(strcmp(symbol_table[i].id_name, type) == 0) {
 			return -1;
 			break;
@@ -350,39 +352,39 @@ void add (char c) {
   q = search(yytext);
   if(!q) {
     if(c == 'H') {
-			symbol_table[count].id_name = strdup(yytext);
-			symbol_table[count].data_type = strdup(type);
-			symbol_table[count].line_no = token_no;
-			symbol_table[count].type = strdup("Header");
-			count++;
+			symbol_table[Count].id_name = strdup(yytext);
+			symbol_table[Count].data_type = strdup(type);
+			symbol_table[Count].line_no = token_no;
+			symbol_table[Count].type = strdup("Header");
+			Count++;
 		}
 		else if(c == 'K') {
-			symbol_table[count].id_name = strdup(yytext);
-			symbol_table[count].data_type = strdup("N/A");
-			symbol_table[count].line_no = token_no;
-			symbol_table[count].type = strdup("Keyword\t");
-			count++;
+			symbol_table[Count].id_name = strdup(yytext);
+			symbol_table[Count].data_type = strdup("N/A");
+			symbol_table[Count].line_no = token_no;
+			symbol_table[Count].type = strdup("Keyword\t");
+			Count++;
 		}
 		else if(c == 'V') {
-			symbol_table[count].id_name = strdup(yytext);
-			symbol_table[count].data_type = strdup(type);
-			symbol_table[count].line_no = token_no;
-			symbol_table[count].type = strdup("Variable");
-			count++;
+			symbol_table[Count].id_name = strdup(yytext);
+			symbol_table[Count].data_type = strdup(type);
+			symbol_table[Count].line_no = token_no;
+			symbol_table[Count].type = strdup("Variable");
+			Count++;
 		}
 		else if(c == 'C') {
-			symbol_table[count].id_name = strdup(yytext);
-			symbol_table[count].data_type = strdup("CONST");
-			symbol_table[count].line_no = token_no;
-			symbol_table[count].type = strdup("Constant");
-			count++;
+			symbol_table[Count].id_name = strdup(yytext);
+			symbol_table[Count].data_type = strdup("CONST");
+			symbol_table[Count].line_no = token_no;
+			symbol_table[Count].type = strdup("Constant");
+			Count++;
 		}
 		else if(c == 'F') {
-			symbol_table[count].id_name = strdup(yytext);
-			symbol_table[count].data_type = strdup(type);
-			symbol_table[count].line_no = token_no;
-			symbol_table[count].type = strdup("Function");
-			count++;
+			symbol_table[Count].id_name = strdup(yytext);
+			symbol_table[Count].data_type = strdup(type);
+			symbol_table[Count].line_no = token_no;
+			symbol_table[Count].type = strdup("Function");
+			Count++;
 		}
 	}
 }
@@ -391,7 +393,7 @@ void insert_type() {
 	strcpy(type, yytext);
 }
 
-struct node* mknode(struct node *left, struct node *right, char *token) {	
+struct node* mknode(struct node *left, struct node *right, const char *token) {	
 	struct node *newnode = (struct node *)malloc(sizeof(struct node));
 	char *newstr = (char *)malloc(strlen(token)+1);
 	strcpy(newstr, token);

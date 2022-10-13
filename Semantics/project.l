@@ -7,11 +7,12 @@ DEC 		{D}+[.]{D}+
 INT			{D}+	
 
 %{
+		#include <bits/stdc++.h>
 		#include <stdio.h>
 		#include <stdlib.h>
 		#include <string.h>
-		#include "project.tab.h"
-
+		#include "project.tab.hpp"
+		using namespace std;
 		void comment();
 		void token_c(FILE* fp);
 		int token_no = 1;
@@ -98,7 +99,7 @@ void comment()
 	int c;
 
 	/* Read until we find \n or EOF */
-	while((c = input()) != '\n' && c != EOF)
+	//while((c = input()) != '\n' && c != EOF)
 		;
 
 	/* Maybe you want to place back EOF? */
