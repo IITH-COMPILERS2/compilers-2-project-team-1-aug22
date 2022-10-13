@@ -139,6 +139,7 @@ int yywrap() {
     return 1;
 }
 
-void yyerror(const char* msg) {
-    fprintf(stderr, "%s\n", msg);
+void yyerror(string msg) {
+    //fprintf(stderr, "%s\n", msg);
+	cout << msg << "\n";
 }

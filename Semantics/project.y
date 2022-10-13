@@ -8,34 +8,34 @@
     /*#include "project.lex.c"*/
     
 	extern char* yytext;
-    void yyerror(const char *s);
+    void yyerror(string s);
     int yylex();
     int yywrap();
     void add(char);
     void insert_type();
-    int search(char *);
+    int search(string);
 
     struct dataType {
-        char* id_name;
-        char* data_type;
-        char* type;
+        string id_name;
+        string data_type;
+        string type;
         int line_no;
     } symbol_table[10000];		/* see this */
 
     int Count=0;
     int q;
-    char type[10];
+    string type;
     extern int token_no;
 	
 	struct node *head;
     struct node {
 		struct node *left; 
 		struct node *right; 
-		char *token; 
+		string token; 
     };
     void printtree(struct node*);
     void printPreorder(struct node *);
-    struct node* mknode(struct node *left, struct node *right, const char *token);
+    struct node* mknode(struct node *left, struct node *right, string token);
 
 %}
 
@@ -322,25 +322,25 @@ jump_statement
 int main(int argc, char* argv[]) 
 {
 	yyparse();
-  	printf("\n\n");
-	printf("\t    SYMBOL TABLE \n\n");
-	printf("\nSYMBOL\t\t\tDATATYPE\t\t\tTYPE\t\t\tLINE_NUMBER \n");
-	printf("___________________________________________________________________________________________\n\n");
+	cout << "\n\n";
+	cout << "\t    SYMBOL TABLE \n\n";
+	cout << "\nSYMBOL\t\t\tDATATYPE\t\t\tTYPE\t\t\tLINE_NUMBER \n";
+	cout << "___________________________________________________________________________________________\n\n";
 
 	for(int i = 0; i < Count; i++) {
-		printf("%s\t\t\t%s\t\t\t\t%s\t\t   %d\n", symbol_table[i].id_name, symbol_table[i].data_type, symbol_table[i].type, symbol_table[i].line_no);
+		cout << symbol_table[i].id_name << "\t\t\t" << symbol_table[i].data_type << "\t\t\t\t" << symbol_table[i].type << "\t\t   " << symbol_table[i].line_no << "\n";
 	}
 	for(int i=0;i<Count;i++) {
-		free(symbol_table[i].id_name);
-		free(symbol_table[i].type);
+		//free(symbol_table[i].id_name);
+		//free(symbol_table[i].type);
 	}
-	printf("\n\n");
+	cout << "\n\n";
 	printtree(head);
 }
 
-int search (char *type) {
+int search (string type) {
 	for (int i = Count - 1; i >= 0; i--) {
-		if(strcmp(symbol_table[i].id_name, type) == 0) {
+		if(symbol_table[i].id_name == type) {
 			return -1;
 			break;
 		}
@@ -352,51 +352,50 @@ void add (char c) {
   q = search(yytext);
   if(!q) {
     if(c == 'H') {
-			symbol_table[Count].id_name = strdup(yytext);
-			symbol_table[Count].data_type = strdup(type);
+			symbol_table[Count].id_name = yytext;
+			symbol_table[Count].data_type = type;
 			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = strdup("Header");
+			symbol_table[Count].type = "Header";
 			Count++;
 		}
 		else if(c == 'K') {
-			symbol_table[Count].id_name = strdup(yytext);
-			symbol_table[Count].data_type = strdup("N/A");
+			symbol_table[Count].id_name = yytext;
+			symbol_table[Count].data_type = "N/A";
 			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = strdup("Keyword\t");
+			symbol_table[Count].type = "Keyword\t";
 			Count++;
 		}
 		else if(c == 'V') {
-			symbol_table[Count].id_name = strdup(yytext);
-			symbol_table[Count].data_type = strdup(type);
+			symbol_table[Count].id_name = yytext;
+			symbol_table[Count].data_type = type;
 			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = strdup("Variable");
+			symbol_table[Count].type = "Variable";
 			Count++;
 		}
 		else if(c == 'C') {
-			symbol_table[Count].id_name = strdup(yytext);
-			symbol_table[Count].data_type = strdup("CONST");
+			symbol_table[Count].id_name = yytext;
+			symbol_table[Count].data_type = "CONST";
 			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = strdup("Constant");
+			symbol_table[Count].type = "Constant";
 			Count++;
 		}
 		else if(c == 'F') {
-			symbol_table[Count].id_name = strdup(yytext);
-			symbol_table[Count].data_type = strdup(type);
+			symbol_table[Count].id_name = yytext;
+			symbol_table[Count].data_type = type;
 			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = strdup("Function");
+			symbol_table[Count].type = "Function";
 			Count++;
 		}
 	}
 }
 
 void insert_type() {
-	strcpy(type, yytext);
+	type = yytext;
 }
 
-struct node* mknode(struct node *left, struct node *right, const char *token) {	
+struct node* mknode(struct node *left, struct node *right, string token) {	
 	struct node *newnode = (struct node *)malloc(sizeof(struct node));
-	char *newstr = (char *)malloc(strlen(token)+1);
-	strcpy(newstr, token);
+	string newstr = token;
 	newnode->left = left;
 	newnode->right = right;
 	newnode->token = newstr;
@@ -404,14 +403,14 @@ struct node* mknode(struct node *left, struct node *right, const char *token) {
 }
 
 void printtree(struct node* tree) {
-	printf("\n\n Preorder traversal of the Parse Tree: \n\n");
+	cout << "\n\n Preorder traversal of the Parse Tree: \n\n";
 	printPreorder(tree);
-	printf("\n\n");
+	cout << "\n\n";
 }
 
 void printPreorder(struct node *tree) {
 	int i;
-	printf("%s, ", tree->token);
+	cout << tree->token << " ";
 	if (tree->left) {
 		printPreorder(tree->left);
 	}
