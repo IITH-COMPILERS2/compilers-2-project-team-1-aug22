@@ -99,7 +99,7 @@ void comment()
 	int c;
 
 	/* Read until we find \n or EOF */
-	//while((c = input()) != '\n' && c != EOF)
+	while((c = yyinput()) != '\n' && c != EOF)
 		;
 
 	/* Maybe you want to place back EOF? */
