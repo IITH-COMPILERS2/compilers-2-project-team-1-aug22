@@ -21,8 +21,8 @@ INT			{D}+
 
 %%
 " "						{ }
-#			    		{ comment(); return(EOL); }
-\n						{ strcpy(yylval.nd_obj.name,(yytext)); return(EOL); }
+#			    		{ comment(); token_no++; return(EOL); }
+\n						{ strcpy(yylval.nd_obj.name,(yytext)); token_no++; return(EOL); }
 break					{ strcpy(yylval.nd_obj.name,(yytext)); return(BREAK); }
 continue				{ strcpy(yylval.nd_obj.name,(yytext)); return(CONTINUE); }
 else					{ strcpy(yylval.nd_obj.name,(yytext)); return(ELSE); }
@@ -61,14 +61,14 @@ hyperbola				{ strcpy(yylval.nd_obj.name,(yytext)); return(HYPERBOLA); }
 ")"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(')'); }
 "."           			{ strcpy(yylval.nd_obj.name,(yytext)); return('.'); }
 "!"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('!'); }
-"^"            		{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
+"^"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
 
 "*"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('*');}
 "/"           			{ strcpy(yylval.nd_obj.name,(yytext)); return('/');}
-"+"            		{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
+"+"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
 "-"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('-');}
 "^^"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(POW_OP); }
-"=="           		{ strcpy(yylval.nd_obj.name,(yytext)); return(EQ_OP);}
+"=="           			{ strcpy(yylval.nd_obj.name,(yytext)); return(EQ_OP);}
 
 "&&"					{ strcpy(yylval.nd_obj.name,(yytext)); return(AND_OP); }
 "||"					{ strcpy(yylval.nd_obj.name,(yytext)); return(OR_OP); }
@@ -99,7 +99,7 @@ void comment()
 	int c;
 
 	/* Read until we find \n or EOF */
-	//while((c = input()) != '\n' && c != EOF)
+	while((c = yyinput()) != '\n' && c != EOF)
 		;
 
 	/* Maybe you want to place back EOF? */
