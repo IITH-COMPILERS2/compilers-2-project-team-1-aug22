@@ -20,7 +20,7 @@ INT			{D}+
 
 %%
 " "						{ }
-#			    		{ comment();}
+#			    		{ comment(); return(EOL);}
 \n						{ strcpy(yylval.nd_obj.name,(yytext)); return(EOL); }
 break					{ strcpy(yylval.nd_obj.name,(yytext)); return(BREAK); }
 continue				{ strcpy(yylval.nd_obj.name,(yytext)); return(CONTINUE); }
@@ -60,14 +60,14 @@ hyperbola				{ strcpy(yylval.nd_obj.name,(yytext)); return(HYPERBOLA); }
 ")"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(')'); }
 "."           			{ strcpy(yylval.nd_obj.name,(yytext)); return('.'); }
 "!"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('!'); }
-"^"            		{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
+"^"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('^'); }
 
 "*"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('*');}
 "/"           			{ strcpy(yylval.nd_obj.name,(yytext)); return('/');}
-"+"            		{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
+"+"            			{ strcpy(yylval.nd_obj.name,(yytext)); return('+');}
 "-"             		{ strcpy(yylval.nd_obj.name,(yytext)); return('-');}
 "^^"             		{ strcpy(yylval.nd_obj.name,(yytext)); return(POW_OP); }
-"=="           		{ strcpy(yylval.nd_obj.name,(yytext)); return(EQ_OP);}
+"=="           			{ strcpy(yylval.nd_obj.name,(yytext)); return(EQ_OP);}
 
 "&&"					{ strcpy(yylval.nd_obj.name,(yytext)); return(AND_OP); }
 "||"					{ strcpy(yylval.nd_obj.name,(yytext)); return(OR_OP); }

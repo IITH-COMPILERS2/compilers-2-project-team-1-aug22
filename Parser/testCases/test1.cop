@@ -1,6 +1,7 @@
 main->int
 <<
-    int a,b,c=0
+    int a,b,c=0 #rajaakak
+    #rajak####ssk
     a=a+2
     loop(a==2)
     <<
