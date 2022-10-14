@@ -14,7 +14,9 @@ struct dataType {
     int line_no;
 };
 
-map<string, struct dataType*> symbol_table;
+int value = 1;
+map<string, int> table;
+map<int, struct dataType*> symbol_table;
 
 struct node {
     struct node *left; 
@@ -32,9 +34,9 @@ extern int token_no;
 int q;
 
 int search (string type) {
-	if(symbol_table.find(type) == symbol_table.end())
+	if(symbol_table.find(table[type]) == symbol_table.end())
 		return 0;
-	else return -1;
+	return -1;
 }
 
 struct dataType* newentry(string data_type, int line_no, string type) {
@@ -49,20 +51,26 @@ void add (char c) {
   	q = search(yytext);
   	if(!q) {
 		if(c == 'H') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("", token_no, "Header")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("", token_no, "Header");
 		}
 		else if(c == 'F') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("N/A", token_no, "Function")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("N/A", token_no, "Function");
 		}
 		else if(c == 'K') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("N/A", token_no, "Keyword")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("N/A", token_no, "Keyword");
 		}
 		else if(c == 'V') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry(type, token_no, "Variable")});
+			table[yytext] = value;
+			symbol_table[value] = newentry(type, token_no, "Variable");
 		}
 		else if(c == 'C') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("CONST", token_no, "Constant")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("CONST", token_no, "Constant");
 		}
+		value++;
 	}
 }
 
@@ -101,9 +109,14 @@ void SymbolTableGenerator() {
 	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
 			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
 
-	for(auto i = symbol_table.begin(); i != symbol_table.end(); ++i) {
-		cout << "\t" << left << setw(10) << i->first << left << setw(10) << i->second->data_type
-				<< left << setw(15) << i->second->type << left << setw(3) << i->second->line_no << "\n";
+	for(auto i : symbol_table) {
+		string symbol;
+		for(auto j : table)
+			if(j.second == i.first)
+				symbol = j.first;
+		
+		cout << "\t" << left << setw(10) << symbol << left << setw(10) << i.second->data_type
+				<< left << setw(15) << i.second->type << left << setw(3) << i.second->line_no << "\n";
 	}
 	// for(auto i : symbol_table){
 	// 	free(i.second);
