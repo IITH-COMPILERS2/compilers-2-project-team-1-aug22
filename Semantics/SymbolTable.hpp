@@ -20,7 +20,9 @@ struct dataType {
     int line_no;
 };
 
-map<string, struct dataType*> symbol_table;
+int value = 1;
+map<string, int> table;
+map<int, struct dataType*> symbol_table;
 
 struct node {
     struct node *left; 
@@ -47,9 +49,9 @@ vector<string> keywords = {"void", "int", "bool", "double", "point", "string", "
  						 "hyperbola", "else", "break", "continue"};
 
 int search (string type) {
-	if(symbol_table.find(type) == symbol_table.end())
+	if(symbol_table.find(table[type]) == symbol_table.end())
 		return 0;
-	else return -1;
+	return -1;
 }
 
 struct dataType* newentry(string data_type, int line_no, string type) {
@@ -66,39 +68,40 @@ void add (char c)
 	{
 		for (auto x: keywords)
 		{
-			if (x == yytext)
+			string temp = yytext;
+			if (x == temp)
 			{
-				string tmp = "Line " + to_string(line_no+1) + ": Variable name " + yytext + " is a reserved keyword.\n";
+				string tmp = "Line " + to_string(line_no + 1); + ": Variable name " + temp + " is a reserved keyword.\n";
 				errors.push_back(tmp);
 				sem_errors++;
 				return;
 			}
 		}
 	}
+	
   	q = search(yytext);
   	if(!q) {
 		if(c == 'H') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("", line_no, "Header")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("", line_no, "Header");
 		}
 		else if(c == 'F') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("N/A", line_no, "Function")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("N/A", line_no, "Function");
 		}
 		else if(c == 'K') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("N/A", line_no, "Keyword")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("N/A", line_no, "Keyword");
 		}
 		else if(c == 'V') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry(type, line_no, "Variable")});
+			table[yytext] = value;
+			symbol_table[value] = newentry(type, line_no, "Variable");
 		}
 		else if(c == 'C') {
-			symbol_table.insert(symbol_table.end(), {yytext, newentry("CONST", line_no, "Constant")});
+			table[yytext] = value;
+			symbol_table[value] = newentry("CONST", line_no, "Constant");
 		}
-	
-	}
-	else if (c=='V' && q)
-	{
-		string tmp = "Line " + to_string(line_no+1) + ": Multiple declarations of " + yytext + " not allowed.\n";
-		errors.push_back(tmp);
-		sem_errors++;
+		value++;
 	}
 }
 
@@ -137,9 +140,14 @@ void SymbolTableGenerator() {
 	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
 			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
 
-	for(auto i = symbol_table.begin(); i != symbol_table.end(); ++i) {
-		cout << "\t" << left << setw(10) << i->first << left << setw(10) << i->second->data_type
-				<< left << setw(15) << i->second->type << left << setw(3) << i->second->line_no << "\n";
+	for(auto i : symbol_table) {
+		string symbol;
+		for(auto j : table)
+			if(j.second == i.first)
+				symbol = j.first;
+		
+		cout << "\t" << left << setw(10) << symbol << left << setw(10) << i.second->data_type
+				<< left << setw(15) << i.second->type << left << setw(3) << i.second->line_no << "\n";
 	}
 	// for(auto i : symbol_table){
 	// 	free(i.second);
@@ -189,11 +197,12 @@ int check_types(string type1, string type2)
 
 string get_type(string var)
 {
-  	auto itr = symbol_table.find(var);
+  	auto itr = symbol_table.find(table[var]);
   	if(itr != symbol_table.end())
 	{
 	 	return itr->second->data_type;
 	}
+	return "Incorrect type";
 }
 
 

@@ -15,14 +15,14 @@ INT			{D}+
 		using namespace std;
 		void comment();
 		void token_c(FILE* fp);
-		int token_no = 1;
+		int line_no = 1;
 		FILE *fp2;
 %}
 
 %%
 " "						{ }
-#			    		{ comment(); token_no++; return(EOL); }
-\n						{ strcpy(yylval.nd_obj.name,(yytext)); token_no++; return(EOL); }
+#			    		{ comment(); line_no++; return(EOL); }
+\n						{ strcpy(yylval.nd_obj.name,(yytext)); line_no++; return(EOL); }
 break					{ strcpy(yylval.nd_obj.name,(yytext)); return(BREAK); }
 continue				{ strcpy(yylval.nd_obj.name,(yytext)); return(CONTINUE); }
 else					{ strcpy(yylval.nd_obj.name,(yytext)); return(ELSE); }
