@@ -294,4 +294,16 @@ int main(int argc, char* argv[])
 	yyparse();
 	SymbolTableGenerator();
 	printtree(head);
+
+	if (sem_errors > 0)
+	{
+		cout << "Semantic analysis completed with " << sem_errors << " errors\n";
+		for (int i=0; i<sem_errors; i++)
+			cout << "Error " << i << ": " << errors[i] << endl;
+	}
+	else
+	{
+		cout << "Semantic analysis completed with no errors" << endl;
+	}
+	cout << "\n\n";
 }
