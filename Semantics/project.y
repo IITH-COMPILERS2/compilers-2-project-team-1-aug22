@@ -1,50 +1,16 @@
 %{
-	#include <bits/stdc++.h>
-	#include <stdio.h>
-    #include <string.h>
-    #include <stdlib.h>
-    #include <ctype.h>
-	using namespace std;
-    /*#include "project.lex.c"*/
-    
-	extern char* yytext;
+	#include "SymbolTable.hpp"
     void yyerror(string s);
     int yylex();
     int yywrap();
-    void add(char);
-    void insert_type();
-    int search(string);
-
-    struct dataType {
-        string id_name;
-        string data_type;
-        string type;
-        int line_no;
-    } symbol_table[10000];		/* see this */
-
-    int Count=0;
-    int q;
-    string type;
-    extern int token_no;
-	
-	struct node *head;
-    struct node {
-		struct node *left; 
-		struct node *right; 
-		string token; 
-    };
-    void printtree(struct node*);
-    void printPreorder(struct node *);
-    struct node* mknode(struct node *left, struct node *right, string token);
-
 %}
 
-%union { 
-	struct var_name { 
-		char name[100]; 
+%union {
+	struct var_name {
+		char name[1000];
 		struct node* nd;
-	} nd_obj; 
-} 
+	} nd_obj;
+}
 
 
 
@@ -68,7 +34,7 @@
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement declaration_list declaration 
   declaration_specifiers init_declarator_list init_declarator initializer_list declarator
-  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement
+  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit
 
 %start translation_unit
 
@@ -220,11 +186,11 @@ postfix_expression
 	;
 
 primary_expression
-	: IDENTIFIER		 { add('V'); $$.nd = mknode(NULL, NULL, $1.name); }
-	| INT_CONST			 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
-	| FRAC_CONST		 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
-	| DOUBLE_CONST		 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
-	| STRING_LITERAL	 { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+	: IDENTIFIER		 { $$.nd = mknode(NULL, NULL, $1.name); }
+	| INT_CONST			 { $$.nd = mknode(NULL, NULL, $1.name); }
+	| FRAC_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); }
+	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); }
+	| STRING_LITERAL	 { $$.nd = mknode(NULL, NULL, $1.name); }
 	| '(' expression ')' { $$.nd = mknode($2.nd, NULL, "PRIM_EXPR"); }
 	;
 
@@ -314,107 +280,18 @@ iteration_statement
 jump_statement
 	: CONTINUE { add('K'); } EOL 
 	| BREAK { add('K'); } EOL
-	| EXIT { add('K'); } EOL
-	| EXIT { add('K'); } expression EOL
+	| EXIT { add('K'); } exit { $$.nd = mknode(NULL, $3.nd, "EXIT_EXPR"); }
+	;
+
+exit
+	: EOL
+	| expression EOL { $$.nd = mknode(NULL, $1.nd, "EXIT"); }	
 	;
 %%
 
 int main(int argc, char* argv[]) 
 {
 	yyparse();
-	cout << "\n\n";
-	cout << "\t    SYMBOL TABLE \n\n";
-	cout << "\nSYMBOL\t\t\tDATATYPE\t\t\tTYPE\t\t\tLINE_NUMBER \n";
-	cout << "___________________________________________________________________________________________\n\n";
-
-	for(int i = 0; i < Count; i++) {
-		cout << symbol_table[i].id_name << "\t\t\t" << symbol_table[i].data_type << "\t\t\t\t" << symbol_table[i].type << "\t\t   " << symbol_table[i].line_no << "\n";
-	}
-	for(int i=0;i<Count;i++) {
-		//free(symbol_table[i].id_name);
-		//free(symbol_table[i].type);
-	}
-	cout << "\n\n";
+	SymbolTableGenerator();
 	printtree(head);
-}
-
-int search (string type) {
-	for (int i = Count - 1; i >= 0; i--) {
-		if(symbol_table[i].id_name == type) {
-			return -1;
-			break;
-		}
-	}
-	return 0;
-}
-
-void add (char c) {
-  q = search(yytext);
-  if(!q) {
-    if(c == 'H') {
-			symbol_table[Count].id_name = yytext;
-			symbol_table[Count].data_type = type;
-			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = "Header";
-			Count++;
-		}
-		else if(c == 'K') {
-			symbol_table[Count].id_name = yytext;
-			symbol_table[Count].data_type = "N/A";
-			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = "Keyword\t";
-			Count++;
-		}
-		else if(c == 'V') {
-			symbol_table[Count].id_name = yytext;
-			symbol_table[Count].data_type = type;
-			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = "Variable";
-			Count++;
-		}
-		else if(c == 'C') {
-			symbol_table[Count].id_name = yytext;
-			symbol_table[Count].data_type = "CONST";
-			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = "Constant";
-			Count++;
-		}
-		else if(c == 'F') {
-			symbol_table[Count].id_name = yytext;
-			symbol_table[Count].data_type = type;
-			symbol_table[Count].line_no = token_no;
-			symbol_table[Count].type = "Function";
-			Count++;
-		}
-	}
-}
-
-void insert_type() {
-	type = yytext;
-}
-
-struct node* mknode(struct node *left, struct node *right, string token) {	
-	struct node *newnode = (struct node *)malloc(sizeof(struct node));
-	string newstr = token;
-	newnode->left = left;
-	newnode->right = right;
-	newnode->token = newstr;
-	return(newnode);
-}
-
-void printtree(struct node* tree) {
-	cout << "\n\n Preorder traversal of the Parse Tree: \n\n";
-	printPreorder(tree);
-	cout << "\n\n";
-}
-
-void printPreorder(struct node *tree) {
-	int i;
-	cout << tree->token << " ";
-	if (tree->left) {
-		printPreorder(tree->left);
-	}
-	if (tree->right) {
-		printPreorder(tree->right);
-	}
 }

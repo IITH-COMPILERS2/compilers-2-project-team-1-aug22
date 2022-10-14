@@ -3,14 +3,17 @@ Parser:
 	bison -o project.tab.cpp -vd project.y
 	g++ -o project project.lex.cpp project.tab.cpp -lm -ll
 	clear
-	./project < testCases/test1.cop
-	./project < testCases/test2.cop
-	./project < testCases/test3.cop
+	rm -rf SymbolTables_ASTs 
+	mkdir SymbolTables_ASTs
+	./project < testCases/test1.cop > SymbolTables_ASTs/1.txt
+	./project < testCases/test2.cop > SymbolTables_ASTs/2.txt
+	./project < testCases/test3.cop > SymbolTables_ASTs/3.txt
 	
 clean:
 	rm *.yy.c ||:
 	rm *.out ||:
-	rm -rf outputs ||:
+	rm *.txt ||:
+	rm -rf SymbolTables_ASTs ||:
 	rm *.tab.* ||:
 	rm *.output ||:
 	rm project ||:
