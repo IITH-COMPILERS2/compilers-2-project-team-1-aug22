@@ -2,6 +2,10 @@
 
 using namespace std;
 
+#define ERROR_1(text, line) "Line " + to_string(line) + ": Variable name \"" + text + "\" is a reserved keyword.\n"
+#define ERROR_2(text, line) "Line " + to_string(line) + ": Redeclaration of Variable \"" + text + "\""
+#define ERROR_3(text, line) "Line " + to_string(line) + ": Variable \"" + text + "\" undeclared.\n"
+
 extern char* yytext;
 void add(char);
 void insert_type();
@@ -62,23 +66,7 @@ struct dataType* newentry(string data_type, int line_no, string type) {
 	return temp;
 }
 
-void add (char c) 
-{
-	if (c == 'V')
-	{
-		for (auto x: keywords)
-		{
-			string temp = yytext;
-			if (x == temp)
-			{
-				string tmp = "Line " + to_string(line_no + 1); + ": Variable name " + temp + " is a reserved keyword.\n";
-				errors.push_back(tmp);
-				sem_errors++;
-				return;
-			}
-		}
-	}
-	
+void add (char c) {
   	q = search(yytext);
   	if(!q) {
 		if(c == 'H') {
@@ -94,6 +82,14 @@ void add (char c)
 			symbol_table[value] = newentry("N/A", line_no, "Keyword");
 		}
 		else if(c == 'V') {
+			for (auto x : keywords) {
+				string temp = yytext;
+				if (x == temp) {
+					errors.push_back(ERROR_1(temp, line_no));
+					sem_errors++;
+					return;
+				}
+			}
 			table[yytext] = value;
 			symbol_table[value] = newentry(type, line_no, "Variable");
 		}
@@ -103,10 +99,87 @@ void add (char c)
 		}
 		value++;
 	}
+	else {
+		if(c == 'V'){
+			if(symbol_table.find(table[yytext]) != symbol_table.end()){
+				errors.push_back(ERROR_2(yytext, line_no));
+				sem_errors++;
+				return;
+			}
+		}
+	}
 }
 
 void insert_type() {
 	type = yytext;
+}
+
+void check_declarations(string c) {
+	if(!search(c)) {
+		errors.push_back(ERROR_3(c, line_no));
+		sem_errors++;
+	}
+}
+
+void check_return_type(string returning_value) {
+	string main_dt = get_type("main");
+	string return_dt = get_type(returning_value);
+
+	if ((main_dt == "int" && return_dt == "CONST") || (main_dt == return_dt)) {
+		return;
+	}
+	else {
+		string tmp = "Line " + to_string(line_no+1) + ": Exit type does not match with the function declaration.\n";
+		errors.push_back(tmp);
+		sem_errors++;
+	}
+}
+
+int check_types(string type1, string type2) {
+	if (type2 == "null")
+		return -1;
+	
+	if (type1 == type2)
+		return 0;
+
+	return 1;
+}
+
+string get_type(string var) {
+  	auto itr = symbol_table.find(table[var]);
+  	if(itr != symbol_table.end()) {
+	 	return itr->second->data_type;
+	}
+	return "Incorrect type";
+}
+
+void SymbolTableGenerator() {
+	cout << setw(30) << "SYMBOL TABLE\n\n";
+	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
+			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
+
+	for(auto i : symbol_table) {
+		string symbol;
+		for(auto j : table)
+			if(j.second == i.first)
+				symbol = j.first;
+		
+		cout << "\t" << left << setw(10) << symbol << left << setw(10) << i.second->data_type
+				<< left << setw(15) << i.second->type << left << setw(3) << i.second->line_no << "\n";
+	}
+}
+
+void SemanticErrors() {
+	cout << "\n\n";
+	if (sem_errors > 0) {
+		cout << "Semantic analysis completed with " << sem_errors << " errors\n\n";
+		for (int i=0; i < sem_errors; i++)
+			cout << "Error " << i + 1 << ": " << errors[i];
+	}
+	else {
+		cout << "Semantic analysis completed with no errors" << endl;
+	}
+	cout << "\n\n";
 }
 
 struct node* mknode(struct node *left, struct node *right, string token) {
@@ -134,75 +207,3 @@ void printPreorder(struct node *tree) {
 		printPreorder(tree->right);
 	}
 }
-
-void SymbolTableGenerator() {
-	cout << setw(30) << "SYMBOL TABLE\n\n";
-	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
-			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
-
-	for(auto i : symbol_table) {
-		string symbol;
-		for(auto j : table)
-			if(j.second == i.first)
-				symbol = j.first;
-		
-		cout << "\t" << left << setw(10) << symbol << left << setw(10) << i.second->data_type
-				<< left << setw(15) << i.second->type << left << setw(3) << i.second->line_no << "\n";
-	}
-	// for(auto i : symbol_table){
-	// 	free(i.second);
-	// }
-	cout << "\n\n";
-}
-
-
-void check_declarations(string c) 
-{
-	if(!search(c))
-	{	
-		string tmp = "Line " + to_string(line_no+1) + ": Variable \"" + c + "\" undeclared.\n";
-		errors.push_back(tmp);
-		sem_errors++;
-	}
-}
-
-void check_return_type(string value)
-{
-	string main_dt = get_type("main");
-	string return_dt = get_type(value);
-
-	if ((main_dt == "int" && return_dt == "CONST") || (main_dt == return_dt))
-	{
-		return;
-	}
-	else
-	{
-		string tmp = "Line " + to_string(line_no+1) + ": Exit type does not match with the function declaration.\n";
-		errors.push_back(tmp);
-		sem_errors++;
-	}
-}
-
-int check_types(string type1, string type2)
-{
-	if (type2 == "null")
-		return -1;
-	
-	if (type1 == type2)
-		return 0;
-
-	return 1;
-
-}
-
-string get_type(string var)
-{
-  	auto itr = symbol_table.find(table[var]);
-  	if(itr != symbol_table.end())
-	{
-	 	return itr->second->data_type;
-	}
-	return "Incorrect type";
-}
-
-

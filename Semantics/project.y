@@ -33,7 +33,7 @@
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement declaration_list declaration 
-  declaration_specifiers init_declarator_list init_declarator initializer_list declarator
+  mulendoflines init_declarator_list init_declarator initializer_list declarator
   direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit
 
 %start translation_unit
@@ -94,8 +94,8 @@ type_specifier
 
 
 compound_statement
-	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPUND STATEMENT"); }
-	| FUN_ST statement_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPUND STATEMENT"); }
+	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPOUND_STATEMENT"); }
+	| FUN_ST statement_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPOUND_STATEMENT"); }
 	;
 
 expression_statement
@@ -186,7 +186,7 @@ postfix_expression
 	;
 
 primary_expression
-	: IDENTIFIER		 { $$.nd = mknode(NULL, NULL, $1.name); }
+	: IDENTIFIER		 { check_declarations($1.name); $$.nd = mknode(NULL, NULL, $1.name); }
 	| INT_CONST			 { $$.nd = mknode(NULL, NULL, $1.name); }
 	| FRAC_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); }
 	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); }
@@ -219,13 +219,13 @@ declaration_list
 	;
 
 declaration
-	: declaration_specifiers EOL						{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
-	| declaration_specifiers init_declarator_list EOL	{ $$.nd = mknode($1.nd, $2.nd, "DECLR"); }
+	: type_specifier mulendoflines init_declarator_list EOL	{ $$.nd = mknode($1.nd, $3.nd, "DECLR"); }
 	;
 
-declaration_specifiers
-	: type_specifier						{ $$.nd = mknode($1.nd, NULL, "DECLR_SPCIF"); }
-	| type_specifier declaration_specifiers	{ $$.nd = mknode($1.nd, $2.nd, "DECLR_SPCIF"); }
+mulendoflines
+	: 
+	| EOL 
+	| mulendoflines EOL { $$.nd = mknode($1.nd, NULL, "MUL_END_OF_LINES"); }
 	;
 
 init_declarator_list
@@ -250,6 +250,7 @@ declarator
 
 direct_declarator
 	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); }
+	| type_specifier {  add('V'); }				{ $$.nd = mknode($1.nd, NULL, "DIRECT_DECLR"); }
 	| '(' declarator ')'						{ $$.nd = mknode($2.nd, NULL, "DIRECT_DECLR"); }
 	| direct_declarator '(' parameter_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
 	| direct_declarator '(' identifier_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
@@ -293,17 +294,6 @@ int main(int argc, char* argv[])
 {
 	yyparse();
 	SymbolTableGenerator();
+	SemanticErrors();
 	printtree(head);
-
-	if (sem_errors > 0)
-	{
-		cout << "Semantic analysis completed with " << sem_errors << " errors\n";
-		for (int i=0; i<sem_errors; i++)
-			cout << "Error " << i << ": " << errors[i] << endl;
-	}
-	else
-	{
-		cout << "Semantic analysis completed with no errors" << endl;
-	}
-	cout << "\n\n";
 }
