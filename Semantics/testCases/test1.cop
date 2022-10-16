@@ -1,20 +1,8 @@
 main->int
 <<
-    int a,b,c="hai"
-    parabola nam: 1,2,3,4,5,6
-    a=a+2
-    loop(a==2)
-    <<
-        b+=3
-    >>
-    if(b==3)
-    <<c*=5
-        b+=4
-    >>
-    else
-    <<
-     c=c+5
-    >>
-    c=c*5
-    output : a , c, d
+    a = 10
+    int double
+    int b = 100
+    int b = 10
+    double a = 10 + "Hi"
 >>
