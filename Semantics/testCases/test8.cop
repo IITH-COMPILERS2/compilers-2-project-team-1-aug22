@@ -1,4 +1,4 @@
-Given a circle x^2+y^2=9 and a line x+y=3. Find at how many points the given line meets the circle.
+#Given a circle x^2+y^2=9 and a line x+y=3. Find at how many points the given line meets the circle.
 
 main -> int
 <<
@@ -6,22 +6,16 @@ main -> int
     line l: 0, 0, 0, 1, 1, -6
     point p1
     p1 = centre(cir)
-    angle sl = slope(l)
-    line l1 = 0, 0, 0, sl , 1 , 2(p1.y-p1.x*m)
     point p2 = intersec_pt( l , l1 )
-    float dis = ((p1.x - p2.x)^2 + (p1.y - p2.y)^2)^(1/2)
-    float rad = radius (cir)
-    if(rad > dis)
+    double dis = ((x(p1) - x(p2)) + (y(p1) - y(p2)))
+    double rad = radius (cir)
+    if(rad>dis)                 #incomplete function
     <<
-        output: " The line intersects the circle 2 point "
-    >>
-    else if(rad == dis)
-    <<
-        output : "The line meets the circle at one point 1 point "
+        temp = temp + 1          #temp not defined
     >>
     else
     <<
-        output : "The line wont touch the circle 0 point "
+        temp = temp - 1
     >>
-exit: 0
+    exit: 0
 >>
