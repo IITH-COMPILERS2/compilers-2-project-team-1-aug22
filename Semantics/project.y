@@ -267,11 +267,11 @@ initializer
 	;
 
 selection_statement
-	: IF { add('K'); } '(' expression ')' EOL compound_statement					{ $$.nd = mknode($4.nd, $7.nd, "SELECT_STAT"); }
-	| IF { add('K'); } '(' expression ')' EOL compound_statement ELSE statement 	{ 
-			struct node* tp = mknode($4.nd, $7.nd, "IF_STAT");
-			$$.nd = mknode(tp, $9.nd, "IF_ELSE_STAT"); 
+	: IF { add('K'); } '(' expression ')' EOL compound_statement EOL ELSE EOL compound_statement	{ 
+		struct node* tp = mknode($4.nd, $7.nd, "IF_STAT");
+			$$.nd = mknode(tp, $11.nd, "IF_ELSE_STAT"); 
 		}/* shift reduce conflict here similar to c lang */
+	| IF { add('K'); } '(' expression ')' EOL compound_statement					{ $$.nd = mknode($4.nd, $7.nd, "SELECT_STAT"); }
 	;
 
 iteration_statement
