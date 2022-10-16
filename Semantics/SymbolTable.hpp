@@ -142,7 +142,56 @@ int check_types(string type1, string type2) {
 	if (type1 == type2)
 		return 0;
 
-	return 1;
+	if (type1 == "int" && type2 == "double")
+		return 1;
+
+	if (type1 == "double" && type2 == "int")
+		return 2;
+	
+	if (type1 == "int" && type2 == "bool")
+		return 3;
+	
+	if (type1 == "bool" && type2 == "int")
+		return 4;
+
+	if (type1 == "conic" && type2 == "line")
+		return 5;
+
+	if (type1 == "conic" && type2 == "line_pair")
+		return 6;
+	
+	if (type1 == "conic" && type2 == "circle")
+		return 7;
+
+	if (type1 == "conic" && type2 == "parabola")
+		return 8;
+
+	if (type1 == "conic" && type2 == "ellipse")
+		return 9;
+
+	if (type1 == "conic" && type2 == "hyperbola")
+		return 10;
+
+	if (type1 == "line" && type2 == "conic")
+		return 11;
+
+	if (type1 == "line_pair" && type2 == "conic")
+		return 12;
+	
+	if (type1 == "circle" && type2 == "conic")
+		return 13;
+	
+	if (type1 == "parabola" && type2 == "conic")
+		return 14;
+	
+	if (type1 == "ellipse" && type2 == "conic")
+		return 15;
+	
+	if (type1 == "hyperbola" && type2 == "conic")
+		return 16;
+	
+
+	return -2;
 }
 
 string get_type(string var) {
