@@ -9,6 +9,7 @@
 	struct var_name {
 		char name[1000];
 		struct node* nd;
+		char type[1000];
 	} nd_obj;
 }
 
@@ -114,10 +115,18 @@ expression
 	;
 
 assignment_expression
-	: conditional_expression	{ $$.nd = mknode($1.nd, NULL, "ASS_EXPR"); }
+	: conditional_expression	{ $$.nd = mknode($1.nd, NULL, "ASS_EXPR"); strcpy($$.type, $1.type); }
 	| unary_expression assignment_operator assignment_expression { 
 			struct node* tp = mknode($1.nd, $2.nd, "UN_ASSGN");
 			$$.nd = mknode(tp, $3.nd, "ASS_EXPR");
+			if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+				if(/*print("1") &&*/ check_types($1.type, $3.type) == 0){
+					strcpy($$.type, $1.type); 
+				}
+				else{
+					strcpy($$.type, "undefined");
+				}
+			}
 		}
 	;
 
@@ -128,54 +137,172 @@ assignment_operator
 	;
 
 conditional_expression
-	: logical_or_expression { $$.nd = mknode($1.nd, NULL, "COND_EXPR"); }
+	: logical_or_expression { $$.nd = mknode($1.nd, NULL, "COND_EXPR"); strcpy($$.type, $1.type);  }
 	;
 
 logical_or_expression
-	: logical_and_expression { $$.nd = mknode($1.nd, NULL, "LOGI_OR_EXPR"); }
-	| logical_or_expression OR_OP logical_and_expression { $$.nd = mknode($1.nd, $3.nd, "OR"); }
+	: logical_and_expression { $$.nd = mknode($1.nd, NULL, "LOGI_OR_EXPR"); strcpy($$.type, $1.type);  }
+	| logical_or_expression OR_OP logical_and_expression { $$.nd = mknode($1.nd, $3.nd, "OR"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("2") && */check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
 	;
 
 logical_and_expression
-	: equality_expression { $$.nd = mknode($1.nd, NULL, "LOGI_AND_EXPR"); }
-	| logical_and_expression AND_OP equality_expression { $$.nd = mknode($1.nd, $3.nd, "AND"); }
+	: equality_expression { $$.nd = mknode($1.nd, NULL, "LOGI_AND_EXPR"); strcpy($$.type, $1.type);  }
+	| logical_and_expression AND_OP equality_expression { $$.nd = mknode($1.nd, $3.nd, "AND"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("3") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
 	;
 
 equality_expression
-	: relational_expression { $$.nd = mknode($1.nd, NULL, "EQ_EXPR"); }
-	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "=="); }
-	| equality_expression NE_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "!="); }
+	: relational_expression { $$.nd = mknode($1.nd, NULL, "EQ_EXPR"); strcpy($$.type, $1.type);  }
+	| equality_expression EQ_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "=="); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("4") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| equality_expression NE_OP relational_expression { $$.nd = mknode($1.nd, $3.nd, "!="); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("5") && */check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
 	;
 
 relational_expression
-	: additive_expression	{ $$.nd = mknode($1.nd, NULL, "RELATIONAL_EXPR"); }
-	| relational_expression '<' additive_expression { $$.nd = mknode($1.nd, $3.nd, "<"); }
-	| relational_expression '>' additive_expression { $$.nd = mknode($1.nd, $3.nd, ">"); }
-	| relational_expression LE_OP additive_expression { $$.nd = mknode($1.nd, $3.nd, "<="); }
-	| relational_expression GE_OP additive_expression { $$.nd = mknode($1.nd, $3.nd, ">="); }
+	: additive_expression	{ $$.nd = mknode($1.nd, NULL, "RELATIONAL_EXPR"); strcpy($$.type, $1.type);  }
+	| relational_expression '<' additive_expression { $$.nd = mknode($1.nd, $3.nd, "<"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("6") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| relational_expression '>' additive_expression { $$.nd = mknode($1.nd, $3.nd, ">"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("7") && */check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| relational_expression LE_OP additive_expression { $$.nd = mknode($1.nd, $3.nd, "<="); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("8") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| relational_expression GE_OP additive_expression { $$.nd = mknode($1.nd, $3.nd, ">="); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("9") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
 	;
 
 additive_expression
-	: multiplicative_expression	{ $$.nd = mknode($1.nd, NULL, "ADDITIVE_EXPR"); }
-	| additive_expression '+' multiplicative_expression { $$.nd = mknode($1.nd, $3.nd, "+"); }
-	| additive_expression '-' multiplicative_expression { $$.nd = mknode($1.nd, $3.nd, "-"); }
+	: multiplicative_expression	{ $$.nd = mknode($1.nd, NULL, "ADDITIVE_EXPR"); strcpy($$.type, $1.type);  }
+	| additive_expression '+' multiplicative_expression { $$.nd = mknode($1.nd, $3.nd, "+"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			//print(to_string(check_types($1.type, $3.type)));
+			if(/*print("10") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| additive_expression '-' multiplicative_expression { $$.nd = mknode($1.nd, $3.nd, "-"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("11") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
 	;
 
 multiplicative_expression
-	: cast_expression { $$.nd = mknode($1.nd, NULL, "MUL_EXPR"); }
-	| multiplicative_expression '*' cast_expression { $$.nd = mknode($1.nd, $3.nd, "*"); }
-	| multiplicative_expression '/' cast_expression { $$.nd = mknode($1.nd, $3.nd, "/"); }
-	| multiplicative_expression '%' cast_expression { $$.nd = mknode($1.nd, $3.nd, "%"); }
+	: cast_expression { $$.nd = mknode($1.nd, NULL, "MUL_EXPR"); strcpy($$.type, $1.type);  }
+	| multiplicative_expression '*' cast_expression { $$.nd = mknode($1.nd, $3.nd, "*"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("12") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| multiplicative_expression '/' cast_expression { $$.nd = mknode($1.nd, $3.nd, "/"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("13") &&*/ check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
+	| multiplicative_expression '%' cast_expression { $$.nd = mknode($1.nd, $3.nd, "%"); 
+		if(strcmp($1.type, "undefined") !=0 && strcmp($3.type, "undefined") !=0){
+			if(/*print("14") && */check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type); 
+			}
+			else{
+				strcpy($$.type, "undefined");
+			}
+		}
+	}
 	;
 
 cast_expression
-	: unary_expression { $$.nd = mknode($1.nd, NULL, "CAST_EXPR"); }
-	| '(' type_specifier ')' cast_expression { $$.nd = mknode($2.nd, $4.nd, "CAST_EXPR"); }
+	: unary_expression { $$.nd = mknode($1.nd, NULL, "CAST_EXPR"); strcpy($$.type, $1.type);  }
+	| '(' type_specifier ')' cast_expression { $$.nd = mknode($2.nd, $4.nd, "CAST_EXPR"); strcpy($$.type, $2.name); }
 	;
 
 unary_expression
-	: postfix_expression { $$.nd = mknode($1.nd, NULL, "UNARY_EXPR"); }
-	| unary_operator cast_expression { $$.nd = mknode($1.nd, $2.nd, "UNARY_EXPR"); }
+	: postfix_expression { $$.nd = mknode($1.nd, NULL, "UNARY_EXPR"); strcpy($$.type, $1.type);  }
+	| unary_operator cast_expression { $$.nd = mknode($1.nd, $2.nd, "UNARY_EXPR"); strcpy($$.type, $2.type); }
 	;
 
 unary_operator
@@ -185,17 +312,26 @@ unary_operator
 	;
 
 postfix_expression
-	: primary_expression { $$.nd = mknode($1.nd, NULL, "POSTFIX_EXPR"); }
-	| postfix_expression '(' ')' { $$.nd = mknode($1.nd, NULL, "POSTFIX_EXPR"); }
-	| postfix_expression '(' argument_expression_list ')' { $$.nd = mknode($1.nd, $3.nd, "POSTFIX_EXPR"); }
+	: primary_expression { $$.nd = mknode($1.nd, NULL, "POSTFIX_EXPR"); strcpy($$.type, $1.type);  }
+	| postfix_expression '(' ')' { $$.nd = mknode($1.nd, NULL, "POSTFIX_EXPR"); strcpy($$.type, $1.type);  }
+	| postfix_expression '(' argument_expression_list ')' { $$.nd = mknode($1.nd, $3.nd, "POSTFIX_EXPR"); /*strcpy($$.type, $1.type);  */ }
 	;
 
 primary_expression
-	: IDENTIFIER		 { check_declarations($1.name); $$.nd = mknode(NULL, NULL, $1.name); }
-	| INT_CONST			 { $$.nd = mknode(NULL, NULL, $1.name); }
-	| FRAC_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); }
-	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); }
-	| STRING_LITERAL	 { $$.nd = mknode(NULL, NULL, $1.name); }
+	: IDENTIFIER		 { check_declarations($1.name); $$.nd = mknode(NULL, NULL, $1.name);
+		if(!search($1.name)){
+			strcpy($$.type, "undefined");
+		}
+		else{
+			string a = symbol_table[table[$1.name]]->data_type; 
+			char* c = const_cast<char*>(a.c_str()); 
+			strcpy($$.type, c); 
+		}
+		}		
+	| INT_CONST			 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "int"); /*print($$.type);*/ }
+	| FRAC_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "frac"); }
+	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "double"); }
+	| STRING_LITERAL	 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "string_literal"); }
 	| '(' expression ')' { $$.nd = mknode($2.nd, NULL, "PRIM_EXPR"); }
 	;
 
@@ -225,12 +361,12 @@ declaration_list
 	;
 
 declaration
-	: type_specifier mulendoflines init_declarator_list EOL	{ $$.nd = mknode($1.nd, $3.nd, "DECLR"); }
+	: type_specifier init_declarator_list EOL	{ $$.nd = mknode($1.nd, $2.nd, "DECLR"); }
+	| type_specifier mulendoflines init_declarator_list EOL	{ $$.nd = mknode($1.nd, $3.nd, "DECLR"); }
 	;
 
 mulendoflines
-	: 
-	| EOL 
+	: EOL 
 	| mulendoflines EOL { $$.nd = mknode($1.nd, NULL, "MUL_END_OF_LINES"); }
 	;
 
@@ -292,7 +428,7 @@ jump_statement
 
 exit
 	: EOL
-	| expression EOL { $$.nd = mknode(NULL, $1.nd, "EXIT"); }	
+	| ':' expression EOL { $$.nd = mknode(NULL, $2.nd, "EXIT"); }	
 	;
 
 in_out_statement

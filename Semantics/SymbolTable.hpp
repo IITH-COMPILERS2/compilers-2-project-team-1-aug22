@@ -3,8 +3,9 @@
 using namespace std;
 
 #define ERROR_1(text, line) "Line " + to_string(line) + ": Variable name \"" + text + "\" is a reserved keyword.\n"
-#define ERROR_2(text, line) "Line " + to_string(line) + ": Redeclaration of Variable \"" + text + "\""
+#define ERROR_2(text, line) "Line " + to_string(line) + ": Redeclaration of Variable \"" + text + "\"\n"
 #define ERROR_3(text, line) "Line " + to_string(line) + ": Variable \"" + text + "\" undeclared.\n"
+#define ERROR_4(line) "Line " + to_string(line) + ": Type mismatch\n"
 
 extern char* yytext;
 void add(char);
@@ -135,63 +136,66 @@ void check_return_type(string returning_value) {
 	}
 }
 
-int check_types(string type1, string type2) {
-	if (type2 == "null")
+int check_types(char type1[], char type2[]) {
+	if (strcmp(type2, "null") == 0){
+		errors.push_back(ERROR_4(line_no - 1));
 		return -1;
+	}
 	
-	if (type1 == type2)
+	if (strcmp(type1, type2) == 0)
 		return 0;
 
-	if (type1 == "int" && type2 == "double")
-		return 1;
+	// if (type1 == "int" && type2 == "double")
+	// 	return 1;
 
-	if (type1 == "double" && type2 == "int")
-		return 2;
+	// if (type1 == "double" && type2 == "int")
+	// 	return 2;
 	
-	if (type1 == "int" && type2 == "bool")
-		return 3;
+	// if (type1 == "int" && type2 == "bool")
+	// 	return 3;
 	
-	if (type1 == "bool" && type2 == "int")
-		return 4;
+	// if (type1 == "bool" && type2 == "int")
+	// 	return 4;
 
-	if (type1 == "conic" && type2 == "line")
-		return 5;
+	// if (type1 == "conic" && type2 == "line")
+	// 	return 5;
 
-	if (type1 == "conic" && type2 == "line_pair")
-		return 6;
+	// if (type1 == "conic" && type2 == "line_pair")
+	// 	return 6;
 	
-	if (type1 == "conic" && type2 == "circle")
-		return 7;
+	// if (type1 == "conic" && type2 == "circle")
+	// 	return 7;
 
-	if (type1 == "conic" && type2 == "parabola")
-		return 8;
+	// if (type1 == "conic" && type2 == "parabola")
+	// 	return 8;
 
-	if (type1 == "conic" && type2 == "ellipse")
-		return 9;
+	// if (type1 == "conic" && type2 == "ellipse")
+	// 	return 9;
 
-	if (type1 == "conic" && type2 == "hyperbola")
-		return 10;
+	// if (type1 == "conic" && type2 == "hyperbola")
+	// 	return 10;
 
-	if (type1 == "line" && type2 == "conic")
-		return 11;
+	// if (type1 == "line" && type2 == "conic")
+	// 	return 11;
 
-	if (type1 == "line_pair" && type2 == "conic")
-		return 12;
+	// if (type1 == "line_pair" && type2 == "conic")
+	// 	return 12;
 	
-	if (type1 == "circle" && type2 == "conic")
-		return 13;
+	// if (type1 == "circle" && type2 == "conic")
+	// 	return 13;
 	
-	if (type1 == "parabola" && type2 == "conic")
-		return 14;
+	// if (type1 == "parabola" && type2 == "conic")
+	// 	return 14;
 	
-	if (type1 == "ellipse" && type2 == "conic")
-		return 15;
+	// if (type1 == "ellipse" && type2 == "conic")
+	// 	return 15;
 	
-	if (type1 == "hyperbola" && type2 == "conic")
-		return 16;
+	// if (type1 == "hyperbola" && type2 == "conic")
+	// 	return 16;
 	
-
-	return -2;
+	errors.push_back(ERROR_4(line_no - 1));
+	sem_errors++;
+	return 1;
 }
 
 string get_type(string var) {
@@ -255,4 +259,9 @@ void printPreorder(struct node *tree) {
 	if (tree->right) {
 		printPreorder(tree->right);
 	}
+}
+
+int print(string a) {
+	cout << a << "\n";
+	return 1;
 }

@@ -1,4 +1,4 @@
-Parser:
+Semantic:
 	flex -o project.lex.cpp project.l
 	bison -o project.tab.cpp -vd project.y
 	g++ -o project project.lex.cpp project.tab.cpp -lm -ll
@@ -8,7 +8,7 @@ Parser:
 	./project < testCases/test1.cop > SymbolTables_ASTs/1.txt
 	./project < testCases/test2.cop > SymbolTables_ASTs/2.txt
 	./project < testCases/test3.cop > SymbolTables_ASTs/3.txt
-	
+
 clean:
 	rm *.yy.c ||:
 	rm *.out ||:
