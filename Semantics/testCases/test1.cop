@@ -1,16 +1,20 @@
 main->int
 <<
     int a,b,c="hai"
-    int double
+    parabola nam: 1,2,3,4,5,6
     a=a+2
     loop(a==2)
     <<
-        j+=3
+        b+=3
     >>
     if(b==3)
-    <<d*=5
-        k+=4
+    <<c*=5
+        b+=4
     >>
-    int c
+    else
+    <<
+     c=c+5
+    >>
     c=c*5
+    output : a , c, d
 >>

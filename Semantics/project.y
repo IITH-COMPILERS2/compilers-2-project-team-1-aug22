@@ -27,14 +27,14 @@
 
 %token POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA
 
-%type <nd_obj> translation_unit external_declaration function_definition parameter_list parameters type_specifier 
+%type <nd_obj> translation_unit external_declaration function_definition parameter_list parameters type_specifier in_out_specifier
   compound_statement expression_statement expression assignment_expression
   assignment_operator conditional_expression logical_or_expression logical_and_expression
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement declaration_list declaration 
   mulendoflines init_declarator_list init_declarator initializer_list declarator
-  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit
+  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement
 
 %start translation_unit
 
@@ -46,7 +46,8 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition { $$.nd = mknode(NULL, $1.nd, "EXTERNAL_DECLR"); }
+	: mulendoflines
+	| function_definition { $$.nd = mknode(NULL, $1.nd, "EXTERNAL_DECLR"); }
 	| declaration
 	;
 
@@ -92,6 +93,10 @@ type_specifier
 	| LINE_PAIR	{ insert_type(); }
 	;
 
+in_out_specifier
+	: INPUT		{ insert_type(); }
+	| OUTPUT	{ insert_type(); }
+	;
 
 compound_statement
 	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPOUND_STATEMENT"); }
@@ -211,6 +216,7 @@ statement
 	| selection_statement	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	| iteration_statement	{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	| jump_statement		{ $$.nd = mknode($1.nd, NULL, "STAT"); }
+	| in_out_statement		{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	;
 
 declaration_list
@@ -288,6 +294,10 @@ exit
 	: EOL
 	| expression EOL { $$.nd = mknode(NULL, $1.nd, "EXIT"); }	
 	;
+
+in_out_statement
+	: in_out_specifier { add('F'); } ':' initializer_list 
+
 %%
 
 int main(int argc, char* argv[]) 
