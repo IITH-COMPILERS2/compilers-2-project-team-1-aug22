@@ -1,27 +1,21 @@
-Given an parabola y=x^2+2. Let (1,3) be a point on the parabola. Find the the focal chord of the parabola passing through the given point.
+#Given a circle x^2+y^2=9 and a line x+y=3. Find at how many points the given line meets the circle.
 
-
-focal_chord : parabola eqn , point p1 -> line
+main -> int
 <<
-    line temp
-    if(on_curve(eqn , p1) == false)
+    circle cir : 1, 1, 0, 0, 0, -9
+    line l: 0, 0, 0, 1, 1, -6
+    point p1
+    p1 = centre(cir)
+    point p2 = intersec_pt( l , l1 )
+    double dis = ((x(p1) - x(p2)) + (y(p1) - y(p2)))
+    double rad = radius (cir)
+    if(rad>dis)                 #incomplete function
     <<
-        output : "The given point does not lie on the parabola."
+        temp = temp + 1          #temp not defined
     >>
-    else 
+    else
     <<
-        point p2 : focii(parabola)
-        temp : 0, 0, 0, (p2.y - p1.y), (p1.x - p2.x), 2((p1.y*p2.x) - (p2.y*p1.x))
+        temp = temp - 1
     >>
-    exit : temp
->>   
-
-main -> int 
-<<
-    point p : 1, 3
-    parabola eqn : 1, 0, 0, 0, -½, 2
-    line = focal_chord(eqn, p)
-    ans =  eq(line) 
-    output: “The equation of focal chord is:”, ans
     exit: 0
 >>
