@@ -141,5 +141,5 @@ int yywrap() {
 
 void yyerror(string msg) {
     //fprintf(stderr, "%s\n", msg);
-	cout << msg << "\n";
+	cout << msg << " at line " << yylineno << " and at statement \"" << yytext << "\"\n";
 }

@@ -5,7 +5,7 @@
     int yywrap();
 %}
 
-%define parse.error verbose
+%define parse.error simple
 %union {
 	struct var_name {
 		char name[1000];
@@ -36,7 +36,7 @@
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement declaration_list declaration 
   mulendoflines init_declarator_list init_declarator initializer_list declarator
-  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement
+  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement error_fun
 
 %start translation_unit
 
@@ -54,10 +54,15 @@ external_declaration
 	;
 
 function_definition
-    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier EOL compound_statement { 
-		struct node* tp = mknode($3.nd, $5.nd, "OPTIONS");
-		$$.nd = mknode(tp, $7.nd, $1.name); 
+    : IDENTIFIER { add('F'); } parameter_list ARROW error_fun type_specifier EOL compound_statement { 
+		struct node* tp = mknode($3.nd, $6.nd, "OPTIONS");
+		$$.nd = mknode(tp, $8.nd, $1.name); 
 	}
+	;
+
+error_fun
+	: 
+	| error
 	;
 
 parameter_list
