@@ -5,6 +5,7 @@
     int yywrap();
 %}
 
+%define parse.error verbose
 %union {
 	struct var_name {
 		char name[1000];
@@ -56,7 +57,7 @@ function_definition
     : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier EOL compound_statement { 
 		struct node* tp = mknode($3.nd, $5.nd, "OPTIONS");
 		$$.nd = mknode(tp, $7.nd, $1.name); 
-		} 
+	}
 	;
 
 parameter_list
@@ -328,9 +329,9 @@ primary_expression
 			strcpy($$.type, c); 
 		}
 		}		
-	| INT_CONST			 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "int"); /*print($$.type);*/ }
+	| INT_CONST			 { $$.nd = mknode(NULL, NULL, "INT_CONST"); strcpy($$.type, "int"); /*print($$.type);*/ }
 	| FRAC_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "frac"); }
-	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "double"); }
+	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, "DOUBLE_CONST"); strcpy($$.type, "double"); }
 	| STRING_LITERAL	 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "string_literal"); }
 	| '(' expression ')' { $$.nd = mknode($2.nd, NULL, "PRIM_EXPR"); }
 	;
@@ -376,23 +377,33 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator						{ $$.nd = mknode($1.nd, NULL, "INIT_DECLR"); }
-	| declarator '=' initializer		{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); }
-	| declarator ':' initializer_list 	{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); }
+	: declarator						{ $$.nd = mknode($1.nd, NULL, "INIT_DECLR"); strcpy($$.type, $1.type); }
+	| declarator '=' initializer		{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); 
+			if(/*print("14") && */check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type);
+			}
+		}
+	| declarator ':' initializer_list 	{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); strcpy($$.type, $1.type); }
 	;
 
 initializer_list
-	: initializer						{ $$.nd = mknode($1.nd, NULL, "INIT_LIST"); }
-	| initializer_list ',' initializer	{ $$.nd = mknode($1.nd, $3.nd, "INIT_LIST"); }
+	: initializer						{ $$.nd = mknode($1.nd, NULL, "INIT_LIST"); strcpy($$.type, $1.type);}
+	| initializer_list ',' initializer	{ $$.nd = mknode($1.nd, $3.nd, "INIT_LIST"); strcpy($$.type, $3.type);}
 	;
 
 declarator
-	: direct_declarator					{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
+	: direct_declarator					{ $$.nd = mknode($1.nd, NULL, "DECLR"); strcpy($$.type, $1.type); }
 	;
 
 direct_declarator
-	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); }
-	| type_specifier {  add('V'); }				{ $$.nd = mknode($1.nd, NULL, "DIRECT_DECLR"); }
+	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); 
+			string a = symbol_table[table[$1.name]]->data_type; 
+			char* c = const_cast<char*>(a.c_str()); 
+			strcpy($$.type, c);
+		}
+	| type_specifier {  add('V'); }				{ $$.nd = mknode($1.nd, NULL, "DIRECT_DECLR"); 
+			strcpy($$.type, $1.name); 
+		}
 	| '(' declarator ')'						{ $$.nd = mknode($2.nd, NULL, "DIRECT_DECLR"); }
 	| direct_declarator '(' parameter_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
 	| direct_declarator '(' identifier_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
@@ -405,7 +416,7 @@ identifier_list
 	;
 
 initializer
-	: assignment_expression				{ $$.nd = mknode($1.nd, NULL, "INITIALIZER"); }
+	: assignment_expression				{ $$.nd = mknode($1.nd, NULL, "INITIALIZER"); strcpy($$.type, $1.type); }
 	;
 
 selection_statement
