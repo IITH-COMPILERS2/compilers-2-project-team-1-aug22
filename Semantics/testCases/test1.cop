@@ -5,4 +5,8 @@ main->int
     int b = 100
     int b = 10
     double a = 10 + "Hi"
+    <<
+        int p = 10
+    >>
+    int q = 2
 >>

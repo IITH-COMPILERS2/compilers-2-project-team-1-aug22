@@ -54,7 +54,7 @@ external_declaration
 	;
 
 function_definition
-    : IDENTIFIER { add('F'); } parameter_list ARROW error_fun type_specifier EOL compound_statement { 
+    : IDENTIFIER { enter_scope(); add('F'); } parameter_list ARROW error_fun type_specifier EOL compound_statement { 
 		struct node* tp = mknode($3.nd, $6.nd, "OPTIONS");
 		$$.nd = mknode(tp, $8.nd, $1.name); 
 	}
@@ -107,7 +107,7 @@ in_out_specifier
 
 compound_statement
 	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPOUND_STATEMENT"); }
-	| FUN_ST statement_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPOUND_STATEMENT"); }
+	| FUN_ST { enter_scope(); } statement_list FUN_EN				{$$.nd = mknode(NULL, $3.nd, "COMPOUND_STATEMENT"); exit_scope(); }
 	;
 
 expression_statement
@@ -329,7 +329,7 @@ primary_expression
 			strcpy($$.type, "undefined");
 		}
 		else{
-			string a = symbol_table[table[$1.name]]->data_type; 
+			string a = symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[$1.name]]->data_type; 
 			char* c = const_cast<char*>(a.c_str()); 
 			strcpy($$.type, c); 
 		}
@@ -402,7 +402,7 @@ declarator
 
 direct_declarator
 	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); 
-			string a = symbol_table[table[$1.name]]->data_type; 
+			string a = symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[$1.name]]->data_type; 
 			char* c = const_cast<char*>(a.c_str()); 
 			strcpy($$.type, c);
 		}

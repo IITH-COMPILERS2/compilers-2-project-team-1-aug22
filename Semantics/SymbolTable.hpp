@@ -24,10 +24,16 @@ struct dataType {
     string type;
     int line_no;
 };
+typedef struct dataType dataType;
 
 int value = 1;
-map<string, int> table;
-map<int, struct dataType*> symbol_table;
+struct scope_table{
+	map<string, int> scope_table_util;
+	map<int, dataType*> symbol_info;
+};
+typedef struct scope_table scope_table;
+
+vector<scope_table*> symbol_table;
 
 struct node {
     struct node *left; 
@@ -54,33 +60,43 @@ vector<string> keywords = {"void", "int", "bool", "double", "point", "string", "
  						 "hyperbola", "else", "break", "continue"};
 
 int search (string type) {
-	if(symbol_table.find(table[type]) == symbol_table.end())
+	if(symbol_table.back()->symbol_info.find(symbol_table.back()->scope_table_util[type]) == symbol_table.back()->symbol_info.end())
 		return 0;
 	return -1;
 }
 
-struct dataType* newentry(string data_type, int line_no, string type) {
-	struct dataType* temp = new struct dataType;
+void set_value(string yytext, int value) {
+	symbol_table.back()->scope_table_util[yytext] = value;
+}
+
+void newentry(string data_type, int line_no, string type, int value) {
+	dataType* temp = new dataType;
 	temp->data_type = data_type;
 	temp->line_no = line_no;
 	temp->type = type;
-	return temp;
+	symbol_table.back()->symbol_info[value] = temp;
 }
 
 void add (char c) {
   	q = search(yytext);
   	if(!q) {
 		if(c == 'H') {
-			table[yytext] = value;
-			symbol_table[value] = newentry("", line_no, "Header");
+			set_value(yytext, value);
+			newentry("", line_no, "Header", value);
+			// scope_table_util[yytext] = value;
+			// symbol_info[value] = newentry();
 		}
 		else if(c == 'F') {
-			table[yytext] = value;
-			symbol_table[value] = newentry("N/A", line_no, "Function");
+			set_value(yytext, value);
+			newentry("N/A", line_no, "Function", value);
+			// scope_table_util[yytext] = value;
+			// symbol_info[value] = newentry("N/A", line_no, "Function");
 		}
 		else if(c == 'K') {
-			table[yytext] = value;
-			symbol_table[value] = newentry("N/A", line_no, "Keyword");
+			set_value(yytext, value);
+			newentry("N/A", line_no, "Keyword", value);
+			// scope_table_util[yytext] = value;
+			// symbol_info[value] = newentry("N/A", line_no, "Keyword");
 		}
 		else if(c == 'V') {
 			for (auto x : keywords) {
@@ -91,18 +107,22 @@ void add (char c) {
 					return;
 				}
 			}
-			table[yytext] = value;
-			symbol_table[value] = newentry(type, line_no, "Variable");
+			set_value(yytext, value);
+			newentry(type, line_no, "Variable", value);
+			// scope_table_util[yytext] = value;
+			// symbol_info[value] = newentry(type, line_no, "Variable");
 		}
 		else if(c == 'C') {
-			table[yytext] = value;
-			symbol_table[value] = newentry("CONST", line_no, "Constant");
+			set_value(yytext, value);
+			newentry("CONST", line_no, "Constant", value); 
+			// scope_table_util[yytext] = value;
+			// symbol_info[value] = newentry("CONST", line_no, "Constant");
 		}
 		value++;
 	}
 	else {
 		if(c == 'V'){
-			if(symbol_table.find(table[yytext]) != symbol_table.end()){
+			if(symbol_table.back()->symbol_info.find(symbol_table.back()->scope_table_util[yytext]) != symbol_table.back()->symbol_info.end()){
 				errors.push_back(ERROR_2(yytext, line_no));
 				sem_errors++;
 				return;
@@ -199,26 +219,44 @@ int check_types(char type1[], char type2[]) {
 }
 
 string get_type(string var) {
-  	auto itr = symbol_table.find(table[var]);
-  	if(itr != symbol_table.end()) {
+  	auto itr = symbol_table.back()->symbol_info.find(symbol_table.back()->scope_table_util[var]);
+  	if(itr != symbol_table.back()->symbol_info.end()) {
 	 	return itr->second->data_type;
 	}
 	return "Incorrect type";
 }
 
-void SymbolTableGenerator() {
-	cout << setw(30) << "SYMBOL TABLE\n\n";
+void enter_scope() {
+	scope_table* newscope = new scope_table;
+	symbol_table.push_back(newscope);
+}
+
+void ScopeTableGenerator(scope_table* s) {
+	cout << setw(30) << "SCOPE TABLE\n\n";
 	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
 			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
 
-	for(auto i : symbol_table) {
+	for(auto i : s->symbol_info) {
 		string symbol;
-		for(auto j : table)
+		for(auto j : s->scope_table_util)
 			if(j.second == i.first)
 				symbol = j.first;
 		
 		cout << "\t" << left << setw(10) << symbol << left << setw(10) << i.second->data_type
 				<< left << setw(15) << i.second->type << left << setw(3) << i.second->line_no << "\n";
+	}
+}
+
+void exit_scope() {
+	ScopeTableGenerator(symbol_table.back());
+	scope_table* temp = symbol_table.back();
+	symbol_table.pop_back();
+	free(temp);
+}
+
+void SymbolTableGenerator() {
+	for(auto i : symbol_table) {
+		ScopeTableGenerator(i);
 	}
 }
 
@@ -261,7 +299,7 @@ void printPreorder(struct node *tree) {
 	}
 }
 
-int print(string a) {
-	cout << a << "\n";
+int print() {
+	cout << symbol_table.size() << "\n";
 	return 1;
 }
