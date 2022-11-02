@@ -1,4 +1,4 @@
-main->int
+main : int revanth, string vikas ->int
 <<
     a = 10
     int double

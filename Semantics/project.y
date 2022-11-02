@@ -36,14 +36,14 @@
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement declaration_list declaration 
   mulendoflines init_declarator_list init_declarator initializer_list declarator
-  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement error_fun
+  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement error_fun temp_fun
 
 %start translation_unit
 
 %%
 
 translation_unit
-	: external_declaration { $$.nd = mknode(NULL, $1.nd, "TRANSLATION_UNIT"); head = $$.nd; }
+	: { enter_scope(); } external_declaration { $$.nd = mknode(NULL, $2.nd, "TRANSLATION_UNIT"); head = $$.nd; }
 	| translation_unit external_declaration { $2.nd = mknode(NULL, NULL, "TRANSLATION_UNIT"); $$.nd = mknode($1.nd, $2.nd, "TRANSLATION_UNIT"); head = $$.nd; }
 	;
 
@@ -54,9 +54,9 @@ external_declaration
 	;
 
 function_definition
-    : IDENTIFIER { enter_scope(); add('F'); } parameter_list ARROW error_fun type_specifier EOL compound_statement { 
+    : IDENTIFIER { function_name = yytext; is_function_now = true; } parameter_list ARROW error_fun type_specifier { ret_type = yytext; add('F'); } EOL compound_statement { 
 		struct node* tp = mknode($3.nd, $6.nd, "OPTIONS");
-		$$.nd = mknode(tp, $8.nd, $1.name); 
+		$$.nd = mknode(tp, $9.nd, $1.name);
 	}
 	;
 
@@ -71,14 +71,18 @@ parameter_list
 	;
 
 parameters
-	: type_specifier IDENTIFIER { add('V'); 
+	: type_specifier IDENTIFIER {
 			struct node* tp = mknode(NULL, NULL, $2.name);
 			$$.nd = mknode($1.nd, tp, "PARAMS");
+			function_params.push_back($1.name);
+			param_id.push_back({$1.name, $2.name});
 		}
-	| parameters ',' type_specifier IDENTIFIER { add('V'); 
+	| parameters ',' type_specifier IDENTIFIER {
 			struct node* tp = mknode(NULL, NULL, $4.name);
 			struct node* tp2 = mknode($3.nd, tp, "VARIABLES");
 			$$.nd = mknode($1.nd, tp2, "PARAMS");
+			function_params.push_back($3.name);
+			param_id.push_back({$3.name, $4.name});
 		}
 	;
 
@@ -107,7 +111,24 @@ in_out_specifier
 
 compound_statement
 	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPOUND_STATEMENT"); }
-	| FUN_ST { enter_scope(); } statement_list FUN_EN				{$$.nd = mknode(NULL, $3.nd, "COMPOUND_STATEMENT"); exit_scope(); }
+	| FUN_ST temp_fun statement_list FUN_EN				{$$.nd = mknode(NULL, $3.nd, "COMPOUND_STATEMENT"); exit_scope(); }
+	;
+
+temp_fun
+	: {
+		if(is_function_now){
+			symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[function_name]]->params = function_params;
+		}
+		enter_scope(); 
+		if(is_function_now){
+			for(auto i : param_id) {
+				add_params(i.first, i.second);
+			}
+			function_params.clear();
+			param_id.clear();
+			is_function_now = false;
+		}
+	}
 	;
 
 expression_statement

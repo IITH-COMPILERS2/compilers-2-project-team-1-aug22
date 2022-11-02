@@ -23,6 +23,7 @@ struct dataType {
     string data_type;
     string type;
     int line_no;
+	vector<string> params;
 };
 typedef struct dataType dataType;
 
@@ -49,6 +50,11 @@ struct node* mknode(struct node *left, struct node *right, string token);
 string type;
 extern int line_no;
 int q;
+vector<string> function_params;
+vector<pair<string, string>> param_id;
+bool is_function_now = false;
+string ret_type;
+string function_name;
 
 int sem_errors = 0;
 int label = 0;
@@ -87,8 +93,9 @@ void add (char c) {
 			// symbol_info[value] = newentry();
 		}
 		else if(c == 'F') {
-			set_value(yytext, value);
-			newentry("N/A", line_no, "Function", value);
+			set_value(function_name, value);
+			newentry(ret_type, line_no, "Function", value);
+			//symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[function_name]]->params = function_params;
 			// scope_table_util[yytext] = value;
 			// symbol_info[value] = newentry("N/A", line_no, "Function");
 		}
@@ -128,6 +135,23 @@ void add (char c) {
 				return;
 			}
 		}
+	}
+}
+
+void add_params(string type, string id) {
+	q = search(id);
+  	if(!q) {
+		for (auto x : keywords) {
+				string temp = id;
+				if (x == temp) {
+					errors.push_back(ERROR_1(temp, line_no));
+					sem_errors++;
+					return;
+				}
+			}
+		set_value(id, value);
+		newentry(type, line_no, "Variable", value);
+		value++;
 	}
 }
 
@@ -244,6 +268,11 @@ void ScopeTableGenerator(scope_table* s) {
 		
 		cout << "\t" << left << setw(10) << symbol << left << setw(10) << i.second->data_type
 				<< left << setw(15) << i.second->type << left << setw(3) << i.second->line_no << "\n";
+		// if(i.second->type == "Function") {
+		// 	for(auto j : i.second->params) {
+		// 		cout << j << " ";
+		// 	}
+		// }
 	}
 }
 
