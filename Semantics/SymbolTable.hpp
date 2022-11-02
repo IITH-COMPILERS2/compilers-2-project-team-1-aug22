@@ -31,6 +31,7 @@ int value = 1;
 struct scope_table{
 	map<string, int> scope_table_util;
 	map<int, dataType*> symbol_info;
+	string scope;
 };
 typedef struct scope_table scope_table;
 
@@ -52,6 +53,7 @@ extern int line_no;
 int q;
 vector<string> function_params;
 vector<pair<string, string>> param_id;
+map<int, int> scopes;
 bool is_function_now = false;
 string ret_type;
 string function_name;
@@ -253,11 +255,19 @@ string get_type(string var) {
 void enter_scope() {
 	scope_table* newscope = new scope_table;
 	symbol_table.push_back(newscope);
+	string scope;
+	for(int i = 0; i < symbol_table.size(); ++i) {
+		scope += to_string(scopes[symbol_table.size()] + 1);
+		if(i != symbol_table.size() - 1) {
+			scope += '.';
+		}
+	}
+	symbol_table.back()->scope = scope;
 }
 
 void ScopeTableGenerator(scope_table* s) {
-	cout << right << setw(30) << "SCOPE TABLE\n";
-	cout << right << setw(31) << "~~~~~~~~~~~\n\n";
+	cout << right << setw(30) << "SCOPE TABLE " << s->scope << "\n";
+	cout << right << setw(40) << "~~~~~~~~~~~~~~~~~~~~~~~\n\n";
 	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
 			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
 
@@ -281,6 +291,7 @@ void ScopeTableGenerator(scope_table* s) {
 void exit_scope() {
 	ScopeTableGenerator(symbol_table.back());
 	scope_table* temp = symbol_table.back();
+	scopes[symbol_table.size()]++;
 	symbol_table.pop_back();
 	free(temp);
 }
