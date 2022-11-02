@@ -256,7 +256,8 @@ void enter_scope() {
 }
 
 void ScopeTableGenerator(scope_table* s) {
-	cout << setw(30) << "SCOPE TABLE\n\n";
+	cout << right << setw(30) << "SCOPE TABLE\n";
+	cout << right << setw(31) << "~~~~~~~~~~~\n\n";
 	cout << "\t" << left << setw(10) << "SYMBOL" << left << setw(10) << "DATATYPE" 
 			<< left << setw(15) << "TYPE" << left << setw(3) << "LINE_NUMBER\n";
 
@@ -274,6 +275,7 @@ void ScopeTableGenerator(scope_table* s) {
 		// 	}
 		// }
 	}
+	cout << "\n";
 }
 
 void exit_scope() {
