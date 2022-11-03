@@ -257,7 +257,7 @@ void enter_scope() {
 	symbol_table.push_back(newscope);
 	string scope;
 	for(int i = 0; i < symbol_table.size(); ++i) {
-		scope += to_string(scopes[symbol_table.size()] + 1);
+		scope += to_string(scopes[i + 1] + 1);
 		if(i != symbol_table.size() - 1) {
 			scope += '.';
 		}
