@@ -1,0 +1,43 @@
+declrdeclr_trav
+fun_trav
+                  SCOPE TABLE 1.1.1
+               ~~~~~~~~~~~~~~~~~~~~~~~
+
+	SYMBOL    DATATYPE  TYPE           LINE_NUMBER
+	p         int       Variable       10 
+
+                  SCOPE TABLE 1.1
+               ~~~~~~~~~~~~~~~~~~~~~~~
+
+	SYMBOL    DATATYPE  TYPE           LINE_NUMBER
+	revanth   int       Variable       4  
+	vikas     string    Variable       4  
+	b         int       Variable       6  
+	a         double    Variable       8  
+	q         int       Variable       12 
+
+fun
+                  SCOPE TABLE 1
+               ~~~~~~~~~~~~~~~~~~~~~~~
+
+	SYMBOL    DATATYPE  TYPE           LINE_NUMBER
+	ravi      int       Variable       1  
+	main      int       Function       2  
+
+
+
+Semantic analysis completed with 5 errors
+
+Error 1: Line 4: Variable "a" undeclared.
+Error 2: Line 5: Variable name "double" is a reserved keyword.
+Error 3: Line 7: Redeclaration of Variable "b"
+Error 4: Line 8: Type mismatch
+Error 5: Line 8: Type mismatch
+
+
+
+
+ Preorder traversal of the Parse Tree: 
+
+TRANSLATION_UNIT TRANSLATION_UNIT TRANSLATION_UNIT DECLR INIT_DECLR_LIST INIT_DECLR DECLR ravi INITIALIZER ASS_EXPR COND_EXPR LOGI_OR_EXPR LOGI_AND_EXPR EQ_EXPR RELATIONAL_EXPR ADDITIVE_EXPR MUL_EXPR CAST_EXPR UNARY_EXPR POSTFIX_EXPR INT_CONST TRANSLATION_UNIT TRANSLATION_UNIT 
+
