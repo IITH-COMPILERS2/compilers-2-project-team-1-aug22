@@ -1,8 +1,12 @@
-main->int
+main : int revanth, string vikas ->int
 <<
     a = 10
     int double
     int b = 100
     int b = 10
     double a = 10 + "Hi"
+    <<
+        int p = 10
+    >>
+    int q = 2
 >>

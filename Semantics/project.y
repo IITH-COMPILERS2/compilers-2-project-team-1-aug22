@@ -1,10 +1,12 @@
 %{
-	#include "SymbolTable.hpp"
+	#include "../Semantics.hpp"
+	#include "../AST.hpp"
     void yyerror(string s);
     int yylex();
     int yywrap();
 %}
 
+%define parse.error simple
 %union {
 	struct var_name {
 		char name[1000];
@@ -16,33 +18,35 @@
 
 
 %token <nd_obj> IDENTIFIER FRAC_CONST DOUBLE_CONST INT_CONST STRING_LITERAL
-%token ARROW LE_OP GE_OP EQ_OP NE_OP POW_OP
-%token AND_OP OR_OP MUL_ASSIGN ADD_ASSIGN
-%token FUN_ST FUN_EN
+%token <nd_obj> ARROW LE_OP GE_OP EQ_OP NE_OP POW_OP
+%token <nd_obj> AND_OP OR_OP MUL_ASSIGN ADD_ASSIGN
+%token <nd_obj> FUN_ST FUN_EN
 
-%token STRING INT LONG BOOL FRAC DOUBLE VOID EOL
-%token TRUE FALSE
-%token INPUT OUTPUT
+%token <nd_obj> STRING INT LONG BOOL FRAC DOUBLE VOID EOL
+%token <nd_obj> TRUE FALSE
+%token <nd_obj> INPUT OUTPUT
 
-%token IF ELSE LOOP CONTINUE BREAK EXIT
+%token <nd_obj> IF ELSE LOOP CONTINUE BREAK EXIT
 
-%token POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA
+%token <nd_obj> POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA
 
 %type <nd_obj> translation_unit external_declaration function_definition parameter_list parameters type_specifier in_out_specifier
   compound_statement expression_statement expression assignment_expression
   assignment_operator conditional_expression logical_or_expression logical_and_expression
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
-  argument_expression_list statement_list statement declaration_list declaration 
+  argument_expression_list statement_list statement /*declaration_list*/ declaration 
   mulendoflines init_declarator_list init_declarator initializer_list declarator
-  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement
+  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit in_out_statement temp_fun
+
+%type <nd_obj> '=' '+' '-' '!'
 
 %start translation_unit
 
 %%
 
 translation_unit
-	: external_declaration { $$.nd = mknode(NULL, $1.nd, "TRANSLATION_UNIT"); head = $$.nd; }
+	: { enter_scope(); } external_declaration { $$.nd = mknode(NULL, $2.nd, "TRANSLATION_UNIT"); head = $$.nd; }
 	| translation_unit external_declaration { $2.nd = mknode(NULL, NULL, "TRANSLATION_UNIT"); $$.nd = mknode($1.nd, $2.nd, "TRANSLATION_UNIT"); head = $$.nd; }
 	;
 
@@ -53,26 +57,35 @@ external_declaration
 	;
 
 function_definition
-    : IDENTIFIER { add('F'); } parameter_list ARROW type_specifier EOL compound_statement { 
-		struct node* tp = mknode($3.nd, $5.nd, "OPTIONS");
-		$$.nd = mknode(tp, $7.nd, $1.name); 
-		} 
+    : IDENTIFIER { function_name = yytext; is_function_now = true; } parameter_list ARROW error_fun type_specifier { ret_type = yytext; add('F'); } EOL compound_statement { 
+		struct node* tp = mknode($3.nd, $6.nd, "OPTIONS");
+		$$.nd = mknode(tp, $9.nd, $1.name);
+	}
+	;
+
+error_fun
+	: %empty
+	| error
 	;
 
 parameter_list
-	:
+	: %empty {} 
 	| ':' parameters { $$.nd = mknode(NULL, $2.nd, "PARAMS_LIST"); }
 	;
 
 parameters
-	: type_specifier IDENTIFIER { add('V'); 
+	: type_specifier IDENTIFIER {
 			struct node* tp = mknode(NULL, NULL, $2.name);
 			$$.nd = mknode($1.nd, tp, "PARAMS");
+			function_params.push_back($1.name);
+			param_id.push_back({$1.name, $2.name});
 		}
-	| parameters ',' type_specifier IDENTIFIER { add('V'); 
+	| parameters ',' type_specifier IDENTIFIER {
 			struct node* tp = mknode(NULL, NULL, $4.name);
 			struct node* tp2 = mknode($3.nd, tp, "VARIABLES");
 			$$.nd = mknode($1.nd, tp2, "PARAMS");
+			function_params.push_back($3.name);
+			param_id.push_back({$3.name, $4.name});
 		}
 	;
 
@@ -101,7 +114,25 @@ in_out_specifier
 
 compound_statement
 	: FUN_ST FUN_EN								{$$.nd = mknode(NULL, NULL, "COMPOUND_STATEMENT"); }
-	| FUN_ST statement_list FUN_EN				{$$.nd = mknode(NULL, $2.nd, "COMPOUND_STATEMENT"); }
+	| FUN_ST temp_fun statement_list FUN_EN				{$$.nd = mknode(NULL, $3.nd, "COMPOUND_STATEMENT"); exit_scope(); }
+	;
+
+temp_fun
+	:  %empty {
+		if(is_function_now){
+			symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[function_name]]->params = function_params;
+		}
+		enter_scope(); 
+		if(is_function_now){
+			for(auto i : param_id) {
+				add_params(i.first, i.second);
+			}
+			symbol_table.back()->fun_ret_type = ret_type;
+			function_params.clear();
+			param_id.clear();
+			is_function_now = false;
+		}
+	}
 	;
 
 expression_statement
@@ -110,8 +141,8 @@ expression_statement
 	;
 
 expression
-	: assignment_expression	{ $$.nd = mknode($1.nd, NULL, "EXPR"); }
-	| expression ',' assignment_expression { $$.nd = mknode($1.nd, $3.nd, "EXPR"); }
+	: assignment_expression	{ $$.nd = mknode($1.nd, NULL, "EXPR"); strcpy($$.type, $1.type); }
+	| expression ',' assignment_expression { $$.nd = mknode($1.nd, $3.nd, "EXPR"); strcpy($$.type, $3.type); }
 	;
 
 assignment_expression
@@ -323,14 +354,14 @@ primary_expression
 			strcpy($$.type, "undefined");
 		}
 		else{
-			string a = symbol_table[table[$1.name]]->data_type; 
+			string a = symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[$1.name]]->data_type; 
 			char* c = const_cast<char*>(a.c_str()); 
 			strcpy($$.type, c); 
 		}
 		}		
-	| INT_CONST			 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "int"); /*print($$.type);*/ }
+	| INT_CONST			 { $$.nd = mknode(NULL, NULL, "INT_CONST"); strcpy($$.type, "int"); /*print($$.type);*/ }
 	| FRAC_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "frac"); }
-	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "double"); }
+	| DOUBLE_CONST		 { $$.nd = mknode(NULL, NULL, "DOUBLE_CONST"); strcpy($$.type, "double"); }
 	| STRING_LITERAL	 { $$.nd = mknode(NULL, NULL, $1.name); strcpy($$.type, "string_literal"); }
 	| '(' expression ')' { $$.nd = mknode($2.nd, NULL, "PRIM_EXPR"); }
 	;
@@ -355,10 +386,10 @@ statement
 	| in_out_statement		{ $$.nd = mknode($1.nd, NULL, "STAT"); }
 	;
 
-declaration_list
-	: declaration					{ $$.nd = mknode($1.nd, NULL, "DECLR_LIST"); }
-	| declaration_list declaration	{ $$.nd = mknode($1.nd, $2.nd, "DECLR_LIST"); }
-	;
+// declaration_list
+// 	: declaration					{ $$.nd = mknode($1.nd, NULL, "DECLR_LIST"); }
+// 	| declaration_list declaration	{ $$.nd = mknode($1.nd, $2.nd, "DECLR_LIST"); }
+// 	;
 
 declaration
 	: type_specifier init_declarator_list EOL	{ $$.nd = mknode($1.nd, $2.nd, "DECLR"); }
@@ -376,23 +407,33 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator						{ $$.nd = mknode($1.nd, NULL, "INIT_DECLR"); }
-	| declarator '=' initializer		{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); }
-	| declarator ':' initializer_list 	{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); }
+	: declarator						{ $$.nd = mknode($1.nd, NULL, "INIT_DECLR"); strcpy($$.type, $1.type); }
+	| declarator '=' initializer		{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); 
+			if(/*print("14") && */check_types($1.type, $3.type) == 0){
+				strcpy($$.type, $1.type);
+			}
+		}
+	| declarator ':' initializer_list 	{ $$.nd = mknode($1.nd, $3.nd, "INIT_DECLR"); strcpy($$.type, $1.type); }
 	;
 
 initializer_list
-	: initializer						{ $$.nd = mknode($1.nd, NULL, "INIT_LIST"); }
-	| initializer_list ',' initializer	{ $$.nd = mknode($1.nd, $3.nd, "INIT_LIST"); }
+	: initializer						{ $$.nd = mknode($1.nd, NULL, "INIT_LIST"); strcpy($$.type, $1.type);}
+	| initializer_list ',' initializer	{ $$.nd = mknode($1.nd, $3.nd, "INIT_LIST"); strcpy($$.type, $3.type);}
 	;
 
 declarator
-	: direct_declarator					{ $$.nd = mknode($1.nd, NULL, "DECLR"); }
+	: direct_declarator					{ $$.nd = mknode($1.nd, NULL, "DECLR"); strcpy($$.type, $1.type); }
 	;
 
 direct_declarator
-	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); }
-	| type_specifier {  add('V'); }				{ $$.nd = mknode($1.nd, NULL, "DIRECT_DECLR"); }
+	: IDENTIFIER	{ add('V'); }				{ $$.nd = mknode(NULL, NULL, $1.name); 
+			string a = symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[$1.name]]->data_type; 
+			char* c = const_cast<char*>(a.c_str()); 
+			strcpy($$.type, c);
+		}
+	| type_specifier {  add('V'); }				{ $$.nd = mknode($1.nd, NULL, "DIRECT_DECLR"); 
+			strcpy($$.type, $1.name); 
+		}
 	| '(' declarator ')'						{ $$.nd = mknode($2.nd, NULL, "DIRECT_DECLR"); }
 	| direct_declarator '(' parameter_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
 	| direct_declarator '(' identifier_list ')'	{ $$.nd = mknode($1.nd, $3.nd, "DIRECT_DECLR"); }
@@ -405,30 +446,35 @@ identifier_list
 	;
 
 initializer
-	: assignment_expression				{ $$.nd = mknode($1.nd, NULL, "INITIALIZER"); }
+	: assignment_expression				{ $$.nd = mknode($1.nd, NULL, "INITIALIZER"); strcpy($$.type, $1.type); }
 	;
 
 selection_statement
-	: IF { add('K'); } '(' expression ')' EOL compound_statement EOL ELSE EOL compound_statement	{ 
-		struct node* tp = mknode($4.nd, $7.nd, "IF_STAT");
-			$$.nd = mknode(tp, $11.nd, "IF_ELSE_STAT"); 
+	: IF '(' expression ')' EOL compound_statement EOL ELSE EOL compound_statement	{ 
+		struct node* tp = mknode($3.nd, $6.nd, "IF_STAT");
+			$$.nd = mknode(tp, $10.nd, "IF_ELSE_STAT"); 
 		}/* shift reduce conflict here similar to c lang */
-	| IF { add('K'); } '(' expression ')' EOL compound_statement					{ $$.nd = mknode($4.nd, $7.nd, "SELECT_STAT"); }
+	| IF '(' expression ')' EOL compound_statement					{ $$.nd = mknode($3.nd, $6.nd, "SELECT_STAT"); }
 	;
 
 iteration_statement
-	: LOOP { add('K'); } '(' expression ')' EOL compound_statement	{ $$.nd = mknode($4.nd, $7.nd, "ITER_STAT"); }
+	: LOOP '(' expression ')' EOL compound_statement	{ $$.nd = mknode($3.nd, $6.nd, "ITER_STAT"); }
 	;
 
 jump_statement
-	: CONTINUE { add('K'); } EOL 
-	| BREAK { add('K'); } EOL
-	| EXIT { add('K'); } exit { $$.nd = mknode(NULL, $3.nd, "EXIT_EXPR"); }
+	: CONTINUE EOL 
+	| BREAK EOL
+	| EXIT exit { $$.nd = mknode(NULL, $2.nd, "EXIT_EXPR"); }
 	;
 
 exit
 	: EOL
-	| ':' expression EOL { $$.nd = mknode(NULL, $2.nd, "EXIT"); }	
+	| ':' expression EOL { 
+		$$.nd = mknode(NULL, $2.nd, "EXIT"); 
+		string a = symbol_table.back()->fun_ret_type; 
+		char* c = const_cast<char*>(a.c_str());
+		check_return_types($2.type, c);
+	}
 	;
 
 in_out_statement

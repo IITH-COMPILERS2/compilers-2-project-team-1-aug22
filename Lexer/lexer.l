@@ -1,3 +1,5 @@
+/*Definitions : These are the representations of { digit , non-zero-digit , letter , Hexa-decimal , exponential , decimal , integer }*/
+
 %option noyywrap
 
 D			[0-9]
@@ -6,7 +8,9 @@ L			[a-zA-Z_]
 H			[a-fA-F0-9]                             
 E			[Ee][+-]?{D}+
 DEC 		[+-]?{D}+[.]{D}+
-INT			[+-]?{D}+	
+INT			[+-]?{D}+
+
+/*Definitions : Here we include all the libraries used and declare the functions.*/
 
 %{
 		#include <stdio.h>
@@ -19,6 +23,8 @@ INT			[+-]?{D}+
 		int token_no = 0;
 		FILE *fp2;
 %}
+
+/*Rules : All the key words and the tokens representing them are declared here.*/
 
 %%
 "#"			    		{ token_c(fp2); }
@@ -92,7 +98,7 @@ INT			[+-]?{D}+
 <<EOF>>         		{return 0;}
 %%
 
-int column = 0;
+/*Comments function : Scans the input till there is an input and when a comment appears gives a token "c".*/
 
 void comment()
 {
@@ -107,6 +113,8 @@ void comment()
 		unput(c);
 }
 
+/* Increases and prints the token numbers on each token*/
+
 void token_c(FILE* fp)
 {
 	token_no++;
@@ -114,12 +122,15 @@ void token_c(FILE* fp)
 	return;
 }
 
+/* Prints the token name of the respective keyword*/
+
 void token_pr(FILE* fp2, char str[])
 {
 	fprintf(fp2, "%s\n", str);
 	return;
 }
 
+/*Main takes the argument from the command line opens the respective file and reads from it writes to the output file*/
 
 int main(int argc, char* argv[])
 {

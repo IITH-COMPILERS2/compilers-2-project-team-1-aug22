@@ -1,0 +1,7 @@
+main->int 
+<<
+    int r = 7
+    int a = area(r)
+    output : " Area of circle with radius ", r " is ", a
+    exit : 0
+>>
