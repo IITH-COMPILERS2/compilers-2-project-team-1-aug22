@@ -1,13 +1,28 @@
-int ravi = 10
+int rama = 10000
+int raja = 30 + rama
 main : int revanth, string vikas ->int
 <<
-    a = 10
-    int double
-    int b = 100
-    int b = 10
-    double a = 10 + "Hi"
+    int a
+    output : "Enter a integer Value: "
+    input : a
+    output : a
+    if(a != 0)
     <<
-        int p = 10
+        output: "Value is Even: "
     >>
-    int q = 2
+    else
+    <<
+        output: "Value is Odd: "
+    >>
+
+    if(a == 0)
+    <<
+       output: "Value is multiple of 4"
+    >>
+
+    loop(a != 0)
+    <<
+        a = a - 1
+        output: a
+    >>
 >>
