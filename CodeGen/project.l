@@ -75,6 +75,7 @@ hyperbola				{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yy
 "="			    		{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return('='); }
 "+="					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(ADD_ASSIGN); }
 "*="					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(MUL_ASSIGN); }
+"%"					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return('%'); }
 
 "<="					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(LE_OP); }
 ">="					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(GE_OP); }
