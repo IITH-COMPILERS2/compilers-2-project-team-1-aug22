@@ -1,12 +1,19 @@
-int rama = 10000
-int raja = 30 + rama
-main : int revanth, string vikas ->int
+fun: int b->int
 <<
-    int a
+    int p = 10
+    output: "The Value of p is"
+    output: p
+    output: "The Value of b is"
+    output: b
+>>
+
+main->int
+<<
+    int b
     output : "Enter a integer Value: "
-    input : a
-    output : a
-    if(a != 0)
+    input : b
+    output : b
+    if(b % 2 == 0)
     <<
         output: "Value is Even: "
     >>
@@ -15,14 +22,21 @@ main : int revanth, string vikas ->int
         output: "Value is Odd: "
     >>
 
-    if(a == 0)
+    if(b % 4 == 0)
     <<
        output: "Value is multiple of 4"
     >>
 
-    loop(a != 0)
+    int p = b
+
+    loop(p != 0)
     <<
-        a = a - 1
-        output: a
+        p = p - 1
+        output: p
     >>
+
+    fun(b)
+    int c = b + 2
+    output: "Value of c is"
+    output: c
 >>
