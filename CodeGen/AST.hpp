@@ -27,12 +27,44 @@ const int width = 4;
 Function *fooFunc;
 static LLVMContext Context;
 static IRBuilder<> Builder(Context);
-static Module *ModuleOb = new Module("CoPro", Context);
+vector<map<string, AllocaInst*>> LocalVars;
+string Function_Name;
+bool is_global_decl = false;
+bool fun_param_init = false;
+Module *ModuleOb;
 
-Function *createFunc(IRBuilder <> &Builder, string Name) {
-	FunctionType *functype = FunctionType::get(Builder.getInt32Ty(), false);
+Type* ConvertTypes(string Type){
+	if(Type == "int"){
+		return Builder.getInt32Ty();
+	} else if(Type == "double"){
+		return Builder.getDoubleTy();
+	} else if(Type == "bool"){
+		return Builder.getInt1Ty();
+	} else if(Type == "void"){
+		return Builder.getVoidTy();
+	} else if(Type == "string"){
+		return Builder.getInt32Ty();
+	} else if(Type == "parabola"){
+
+	}
+}
+
+Function *createFunc(IRBuilder <> &Builder, string Name, string returnType) {
+	FunctionType *functype = FunctionType::get(ConvertTypes(returnType), false);
 	Function *foofunc = Function::Create(
 		functype, Function::ExternalLinkage, Name, ModuleOb);
+	return foofunc;
+}
+
+Function *createFuncParams(IRBuilder <> &Builder, string Name, vector<string> params, string returnType) {
+	vector<Type*> Type_params;
+	for(auto i : params){
+		Type_params.push_back(ConvertTypes(i));
+	}
+	FunctionType *functype = FunctionType::get(ConvertTypes(returnType), Type_params, false);
+	Function *foofunc = Function::Create(
+		functype, Function::ExternalLinkage, Name, ModuleOb
+	);
 	return foofunc;
 }
 
@@ -40,18 +72,27 @@ BasicBlock *createBB(Function *foofunc, string Name) {
 	return BasicBlock::Create(Context, Name, foofunc);
 }
 
-void BasicBuildLLVMMain(Module * TheModule)
-{
-    fooFunc = createFunc(Builder,"main");
-    BasicBlock  *entry = createBB(fooFunc,"entry");
-    Builder.SetInsertPoint(entry);
-}
+// void BasicBuildLLVMMain(Module * TheModule)
+// {
+//     fooFunc = createFunc(Builder,"main");
+//     BasicBlock  *entry = createBB(fooFunc,"entry");
+//     Builder.SetInsertPoint(entry);
+// }
 
-void BasicBuildLLVMMain(Module * TheModule, string name)
+void BasicBuildLLVMMain(Module * TheModule, string name, bool isFunctionParams, vector<string> params, string returnType)
 {
-    fooFunc = createFunc(Builder,name);
-    BasicBlock  *entry = createBB(fooFunc,"entry");
+	if(!isFunctionParams)
+    	fooFunc = createFunc(Builder,name, returnType);
+	else
+		fooFunc = createFuncParams(Builder, name, params, returnType);
+    BasicBlock *entry = createBB(fooFunc,"entry");
     Builder.SetInsertPoint(entry);
+	// for(auto it = fooFunc->arg_begin(); it != fooFunc->arg_end(); ++it){
+	// 	cout << it << " ";
+	// 	Value *v = ConstantInt::get(Context, APInt(32, it->getDereferenceableBytes()));
+	// }
+	//cout << fooFunc->arg_begin();
+	// cout << fooFunc->getArg(0);
 }
 
 void print_tabs() {
@@ -77,6 +118,7 @@ class Node {
 		class Declaration* decl;
 		class LoopStatement* loopstmt;
 		class IfElseStatement* ifelsestmt;
+		class FunctionCall* function_call;
 		class Print* print;
 		class Read* read;
 		class Statements* stmts;
@@ -85,35 +127,6 @@ class Node {
 		class Start* start;
 };
 
-// union Node {
-// 	int num;
-// 	char *val;
-// 	class Variable *var;
-// 	class Variables *vars;
-// 	class FieldDeclaration *field;
-// 	class FieldDeclarations *fields;
-// 	class Location *loc;
-// 	class Expression *expr;
-// 	class Assignment *assignstmt;
-// 	class ForStatement *forstmt;
-// 	class WhileStatement *whilestmt;
-// 	class IfElseStatement *ifelsestmt;
-// 	class GotoStatement *gotostmt;
-// 	class Statements *stmts;
-// 	class Block *block;
-// 	class Print *print;
-// 	class ReadLine *read;
-// 	class Start *start;
-// 	Node() {
-// 		start = NULL;
-// 		num = 0;
-// 		val= NULL;
-// 		fields = NULL;
-// 		vars = NULL;
-// 		stmts = NULL;
-// 	}
-// 	~Node(){};
-// };
 struct six_tuple{
 	int a, h, b, g, f, c;
 };
@@ -124,6 +137,7 @@ class Location: public AstNode {
 		string type;
 		int int_val;
 		double dob_val;
+		bool bool_val;
 		string string_val;
 		struct six_tuple tup_val;
 		bool flag;
@@ -135,6 +149,10 @@ class Location: public AstNode {
 		Location(double value) {
 			this->type = string("double");
 			this->dob_val = value;
+		}
+		Location(bool value){
+			this->type = string("bool");
+			this->bool_val = value;
 		}
 		Location(string value, bool flag) {
 			if(flag){
@@ -164,6 +182,8 @@ class Location: public AstNode {
 				cout << dob_val << ">\n";
 			else if(type == "string")
 				cout << string_val << ">\n";
+			else if(type == "bool")
+				cout << bool_val << ">\n";
 			else if(type == "variable")
 				cout << identifier << ">\n";
 		}
@@ -171,11 +191,21 @@ class Location: public AstNode {
 		void interpret();
 		Value *codegen(){
 			if(type != "variable"){
-				Value *v = ConstantInt::get(Context, APInt(32, int_val));
+				Value *v;
+				if(type == "int"){
+					v = ConstantInt::get(Context, APInt(32, int_val));
+				} else if(type == "double"){
+					v = ConstantFP::get(Context, APFloat(dob_val));
+				} else if(type == "string"){
+					v = ConstantInt::get(Context, APInt(32, int_val));
+				} else if(type == "bool"){
+					v = ConstantInt::get(Context, APInt(32, bool_val));
+				}
 				return v;
 			}
 			else{
-				Value* v = ModuleOb->getNamedGlobal(identifier);
+				// Value* v = modules[Function_Name]->getNamedGlobal(identifier);
+				Value* v = LocalVars.back()[this->identifier];
 				return v;
 			}
 		}
@@ -361,6 +391,77 @@ class Assignment_expr: public Statement {
 		}
 };
 
+class FunctionCall: public Statement {
+	private:
+		string name;
+		vector<string> params;
+		bool isParams;
+	public:
+		FunctionCall(string name){
+			this->name = name;
+			this->isParams = 0;
+		}
+		FunctionCall(string name, vector<string> params){
+			this->name = name;
+			this->params = params;
+			this->isParams = 1;
+		}
+		string getNameFun(){
+			return this->name;
+		}
+		void traverse(){
+			TBS;
+			cout << "<Function Call Name: " << this->name << ">\n" ;
+			if(isParams){
+				TBS;
+				cout << "Params: ";
+				for(auto i : this->params){
+					cout << i << " ";
+				}
+				cout << "\n";
+			}
+		}
+		void interpret();
+		Value *codegen(){
+			vector<Value *> args;
+			// map<string, AllocaInst*> mp;
+			// LocalVars.push_back(mp);
+			if(!isParams){
+				Builder.CreateCall(ModuleOb->getFunction(name), args, "call");
+			} else{
+				for(auto i : params){
+					// llvm::ConstantInt CI = dyn_cast<llvm::ConstantInt>(LocalVars.back()[i]);
+					// cout << CI << "-----------\n";
+					// Value* v1 = LocalVars.back()[i];
+					// Value* v2 = ConstantInt::get(Context, APInt(32, 0));
+					// Value* v = Builder.CreateStore(v1, v2);
+					// Constant * C = dyn_cast<Constant*>(V);
+					//LocalVars.back()[i]->getType()->print(llvm::outs());
+					args.push_back(Builder.CreateLoad(LocalVars.back()[i]));
+					// args.push_back(ConstantInt::get(Context, APInt(32, 5)));
+					// args.push_back(ConstantInt::get(Context, v));
+					// args.push_back(Builder.getInt32(5));
+				}
+				// vector<Type *> type;
+				// string s = "%d";
+				// Value* x = Builder.CreateGlobalStringPtr(s);
+				// args.push_back(x);
+				// type.push_back(x->getType());
+				// llvm::ArrayRef <Type *> typeargs(type);
+				// llvm::ArrayRef <Value *> refargs(args);
+				// llvm::FunctionType *FType = FunctionType::get(Type::getInt32Ty(Context), typeargs, false);
+				// auto funcall = modules[Function_Name]->getOrInsertFunction(name, FType);
+				// return Builder.CreateCall(funcall, refargs);
+				
+				// CallInst *caller = CallInst::Create(modules[Function_Name]->getOrInsertFunction(name, FunType[name]), args, name);
+				// Builder.GetInsertBlock()->getInstList().push_back(caller);
+				// return caller;
+				Builder.CreateCall(ModuleOb->getFunction(name), args, "call");
+			}
+			// LocalVars.pop_back();
+		}
+};
+
 class Variable: public AstNode {
 	private:
 		string identifier;
@@ -410,9 +511,33 @@ class Variable: public AstNode {
 				return v;
 			}
 			else{
-				Value* v = ModuleOb->getNamedGlobal(this->identifier);
-				//Value *v = ConstantInt::get(Context, APInt(32, 0));
-				return v;
+				if(fun_param_init){
+					// cout << "Hai guru---------\n";
+					// modules[Function_Name]->getOrInsertGlobal(this->identifier, Builder.getInt32Ty());
+					// GlobalVariable *gvar = modules[Function_Name]->getNamedGlobal(this->identifier);
+					// gvar->setLinkage(GlobalValue::CommonLinkage);
+					// gvar->setAlignment(4);
+					// ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
+					// gvar->setInitializer(const_int_val);
+					// Value *v;
+					// for(auto it = fooFunc->arg_begin(); it != fooFunc->arg_end(); ++it){
+					// 	v = ConstantInt::get(Context, APInt(32, it->getDereferenceableBytes()));
+					// }
+					auto alloc = Builder.CreateAlloca(ConvertTypes(this->type));
+					if(this->type == "int"){
+						Builder.CreateStore(ConstantInt::get(Context, APInt(32, 0)), alloc);
+					} else if(this->type == "double"){
+						Builder.CreateStore(ConstantFP::get(Context, APFloat(double(0))), alloc);
+					}
+					LocalVars.back()[this->identifier] = alloc;
+					Value *v = ConstantInt::get(Context, APInt(32, 0));
+					return v;
+				}
+				else{
+					// Value* v = modules[Function_Name]->getNamedGlobal(this->identifier);
+					Value* v = LocalVars.back()[this->identifier];
+					return v;
+				}
 			}
 		}
 };
@@ -452,13 +577,32 @@ class Declaration: public Statement {
 		Value *codegen(){
 			for (int i = 0; i < variables.size(); i++) {
 				class Variable *variable = variables[i];
-				ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
-				GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
-				gvar->setLinkage(GlobalValue::CommonLinkage);
-				gvar->setAlignment(4);
-				ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
-				gvar->setInitializer(const_int_val);
-				variables[i]->codegen();
+				if(is_global_decl){
+					ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
+					GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
+					gvar->setLinkage(GlobalValue::CommonLinkage);
+					gvar->setAlignment(4);
+					ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
+					gvar->setInitializer(const_int_val);
+					variables[i]->codegen();
+				}
+				else{
+					// modules[Function_Name]->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
+					// GlobalVariable *gvar = modules[Function_Name]->getNamedGlobal(variable->getIdentifier());
+					// gvar->setLinkage(GlobalValue::CommonLinkage);
+					// gvar->setAlignment(4);
+					// ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
+					// gvar->setInitializer(const_int_val);
+					auto alloc = Builder.CreateAlloca(ConvertTypes(variable->getType()));
+					if(variable->getType() == "int"){
+						Builder.CreateStore(Builder.getInt32(0), alloc);
+					} else if(variable->getType() == "double"){
+						Builder.CreateStore(ConstantFP::get(Context, APFloat(double(0))), alloc);
+					}
+					LocalVars.back()[variable->getIdentifier()] = alloc;
+					// Builder.CreateStore(Builder.getInt32(45), alloc);
+					variables[i]->codegen();
+				}
 			}
 			Value *v = ConstantInt::get(Context, APInt(32, 1));
 			return v;
@@ -720,6 +864,22 @@ class Function_Def: public AstNode {
 			this->block = block;
 			this->isparams = 0;
 		}
+		string getNameFun(){
+			return this->name;
+		}
+		bool getisParam(){
+			return this->isparams;
+		}
+		string getReturnType(){
+			return this->returnType;
+		}
+		vector<string> getParams(){
+			vector<string> typeparams;
+			for(auto i : parameters){
+				typeparams.push_back(i->getType());
+			}
+			return typeparams;
+		}
 		void traverse(){
 			TBS;
 			cout << "<Function>\n";
@@ -729,7 +889,7 @@ class Function_Def: public AstNode {
 				TBS;
 				cout << "Parameters: ";
 				for(auto i : parameters){
-					cout << i->getType() << " ";
+					cout << i->getType() << " " << i->getIdentifier();
 				}
 				cout << "\n";
 			}
@@ -743,6 +903,17 @@ class Function_Def: public AstNode {
 		};
 		int interpret();
 		Value *codegen(){
+			if(isparams){
+				fun_param_init = 1;
+				// cout << "HAI-------\n";
+				auto it = fooFunc->arg_begin();
+				for(auto i : parameters){
+					i->codegen();
+					Builder.CreateStore(it, LocalVars.back()[i->getIdentifier()]);
+					it++;
+				}
+				fun_param_init = 0;
+			}
 			return this->block->codegen();
 		}
 };
@@ -779,19 +950,49 @@ class Start:public AstNode {
 		Value *codegen(){
 			cout<<"------Code Generation------"<<endl;
 			Value *v = ConstantInt::get(Context, APInt(32, 0));
-			BasicBuildLLVMMain(ModuleOb);
+			ModuleOb = new Module("Main", Context);
+			// modules[Function_Name] = modules["main"];
+			// BasicBuildLLVMMain(modules[Function_Name]);
 			//field_declarations->codegen();
 			//statements->codegen();
 			//cout << nodes.size() << "\n";
 			for(auto i : nodes){
 				if(i){
-					if(i->decl)
+					if(i->decl){
+						is_global_decl = 1;
 						i->decl->codegen();
-					if(i->func_def)
-						i->func_def->codegen();
+					}
+					if(i->func_def){
+						is_global_decl = 0;
+						// string id = "local";
+
+						
+						// AllocaInst* loc_var = new AllocaInst(Builder.getInt32Ty(), 0, "local");
+						// Context->locals()["local"] = alloc;
+						// if(i->func_def->getNameFun() != "main"){
+							// string function_Name = i->func_def->getNameFun();
+							// modules[Function_Name] = new Module(Function_Name, Context);
+							vector<string> params = i->func_def->getParams();
+							// cout << params.size() << "----------------\n";
+							BasicBuildLLVMMain(ModuleOb, i->func_def->getNameFun(), i->func_def->getisParam(), params, i->func_def->getReturnType());
+							map<string, AllocaInst*> mp;
+							LocalVars.push_back(mp);
+							// auto alloc = Builder.CreateAlloca(Builder.getInt32Ty());
+							// Builder.CreateStore(Builder.getInt32(45), alloc);
+							i->func_def->codegen();
+							Builder.CreateRet(Builder.getInt32(0));
+							// modules[Function_Name]->print(llvm::errs(), nullptr);
+							// // BasicBuildLLVMMain(ModuleOb, i->func_def->getNameFun());
+							// // i->func_def->codegen();
+							// // Builder.CreateRet(Builder.getInt32(0));
+							// ModuleOb->print(llvm::errs(), nullptr);
+						// } else{
+							// i->func_def->codegen();
+						// }
+					}
 				}
 			}
-			Builder.CreateRet(Builder.getInt32(0));
+			// Builder.CreateRet(Builder.getInt32(0));
 			//if (errors == 0)
 			ModuleOb->print(llvm::errs(), nullptr);
 			//else

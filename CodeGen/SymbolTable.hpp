@@ -17,6 +17,7 @@ string function_name;
 map<int, int> scopes;
 bool is_function_now = false;
 vector<string> function_params;
+vector<string> fun_call_params;
 vector<pair<string, string>> param_id;
 vector<string> errors;
 vector<string> keywords = {"void", "int", "bool", "double", "point", "string", "line", "conic", "loop", 

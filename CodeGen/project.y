@@ -47,7 +47,7 @@
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement /*declaration_list*/ declaration 
-  mulendoflines init_declarator_list init_declarator initializer_list declarator
+  mulendoflines init_declarator_list init_declarator initializer_list declarator function_call
   direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit input output temp_fun
 
 %type <obj> '=' '+' '-' '!'
@@ -105,6 +105,7 @@ function_definition
 			}
 			$$.cg_nd->func_def = new Function_Def(string($1.sem_nd.name), vars, string(ret_type), $9.cg_nd->block);
 			param_id.clear();
+			function_params.clear();
 		}
 	}
 	;
@@ -183,7 +184,7 @@ temp_fun
 				add_params(i.first, i.second);
 			}
 			symbol_table.back()->fun_ret_type = ret_type;
-			function_params.clear();
+			// function_params.clear();
 			is_function_now = false;
 		}
 	}
@@ -525,9 +526,38 @@ postfix_expression
 		$$.cg_nd = new Node;
 		$$.cg_nd->cond_expr = new Conditional_expr($1.cg_nd->loc);
 	}
-	| postfix_expression '(' ')' { $$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "POSTFIX_EXPR"); strcpy($$.sem_nd.type, $1.sem_nd.type);  }
-	| postfix_expression '(' argument_expression_list ')' { $$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "POSTFIX_EXPR"); /*strcpy($$.sem_nd.type, $1.sem_nd.type);  */ }
 	;
+
+function_call
+	: IDENTIFIER '(' ')'
+	{
+		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "POSTFIX_EXPR");
+		strcpy($$.sem_nd.type, $1.sem_nd.type);
+		$$.cg_nd = new Node;
+		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name);
+	}
+	| IDENTIFIER '(' argument_expression_list ')'
+	{
+		$$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "POSTFIX_EXPR");
+		$$.cg_nd = new Node;
+		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name, fun_call_params);
+		// fun_call_params.clear();
+	}
+	;
+
+argument_expression_list
+	: IDENTIFIER
+	{
+		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "ARGU_EXPR_LIST");
+		fun_call_params.push_back($1.sem_nd.name);
+	}
+	| argument_expression_list ',' IDENTIFIER
+	{
+		$$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "ARGU_EXPR_LIST");
+		fun_call_params.push_back($3.sem_nd.name);
+	}
+	;
+
 
 primary_expression
 	: IDENTIFIER		 
@@ -571,11 +601,6 @@ primary_expression
 		$$.cg_nd->loc = new Location(string($1.sem_nd.name), 1);
 	}
 	| '(' expression ')' { $$.sem_nd.nd = mknode($2.sem_nd.nd, NULL, "PRIM_EXPR"); }
-	;
-
-argument_expression_list
-	: assignment_expression { $$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "ARGU_EXPR_LIST"); }
-	| argument_expression_list ',' assignment_expression { $$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "ARGU_EXPR_LIST"); }
 	;
 
 statement_list
@@ -636,6 +661,11 @@ statement
 		$$.cg_nd = new Node;
 		$$.cg_nd->stmt = $1.cg_nd->loopstmt;
 		// cout << "hi5\n";
+	}
+	| function_call
+	{
+		$$.cg_nd = new Node;
+		$$.cg_nd->stmt = $1.cg_nd->function_call;
 	}
 	| jump_statement
 	{
@@ -724,7 +754,7 @@ declarator
 
 direct_declarator
 	: IDENTIFIER	{ add('V'); }
-	{ 
+	{
 		$$.sem_nd.nd = mknode(NULL, NULL, $1.sem_nd.name); 
 		string a = symbol_table.back()->symbol_info[symbol_table.back()->scope_table_util[$1.sem_nd.name]]->data_type; 
 		char* c = const_cast<char*>(a.c_str()); 
