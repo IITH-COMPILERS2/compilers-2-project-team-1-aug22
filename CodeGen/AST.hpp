@@ -289,7 +289,7 @@ class Conditional_expr: public Statement {
 			if (this->getType().compare("Unary_Cond") == 0) {
 				Value *v = loc->codegen();
 				if(loc->getType().compare("variable") == 0)
-					v = Builder.CreateLoad(v);
+					v = Builder.CreateLoad(Builder.getInt32Ty(), v, "string");
 				return v;
 			}
 			if (this->getType().compare("Cond") == 0) {
@@ -437,7 +437,7 @@ class FunctionCall: public Statement {
 					// Value* v = Builder.CreateStore(v1, v2);
 					// Constant * C = dyn_cast<Constant*>(V);
 					//LocalVars.back()[i]->getType()->print(llvm::outs());
-					args.push_back(Builder.CreateLoad(LocalVars.back()[i]));
+					args.push_back(Builder.CreateLoad(Builder.getInt32Ty(), LocalVars.back()[i], "dummy"));
 					// args.push_back(ConstantInt::get(Context, APInt(32, 5)));
 					// args.push_back(ConstantInt::get(Context, v));
 					// args.push_back(Builder.getInt32(5));
@@ -581,7 +581,7 @@ class Declaration: public Statement {
 					ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
 					GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
 					gvar->setLinkage(GlobalValue::CommonLinkage);
-					gvar->setAlignment(4);
+					// gvar->setAlignment(4);
 					ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
 					gvar->setInitializer(const_int_val);
 					variables[i]->codegen();
@@ -798,7 +798,7 @@ class Print:public Statement {
 				args.push_back(x);
 				type.push_back(x->getType());
 				v = value->codegen();
-				v = Builder.CreateLoad(v);
+				v = Builder.CreateLoad(Builder.getInt32Ty(), v,"raja");
 				// if (v == 0) {
 				// 	errors++;
 				// 	reportError::ErrorV("Unknown Variable in PRINT");

@@ -41,13 +41,13 @@
 %left '*' '/' '%'
 %nonassoc '!'
 
-%type <obj> translation_unit external_declaration function_definition parameter_list parameters type_specifier
+%type <obj> translation_unit external_declaration function_definition parameter_list parameters type_specifier conic_specifier
   compound_statement expression_statement expression assignment_expression
   assignment_operator conditional_expression logical_or_expression logical_and_expression
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement /*declaration_list*/ declaration 
-  mulendoflines init_declarator_list init_declarator initializer_list declarator function_call
+  mulendoflines init_declarator_list init_declarator declarator function_call
   direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit input output temp_fun
 
 %type <obj> '=' '+' '-' '!'
@@ -143,9 +143,12 @@ type_specifier
 	| INT		{ insert_type(); }
 	| LONG		{ insert_type(); }				
 	| DOUBLE	{ insert_type(); }		
-	| FRAC		{ insert_type(); }		
-	| POINT		{ insert_type(); }		
-	| PARABOLA	{ insert_type(); }		
+	| FRAC		{ insert_type(); }
+	;	
+	
+
+conic_specifier
+	: PARABOLA	{ insert_type(); }		
 	| ELLIPSE	{ insert_type(); }		
 	| HYPERBOLA	{ insert_type(); }		
 	| CIRCLE	{ insert_type(); }		
@@ -543,6 +546,7 @@ function_call
 		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name, fun_call_params);
 		// fun_call_params.clear();
 	}
+	| IDENTIFIER '.' IDENTIFIER '(' argument_expression_list ')'
 	;
 
 argument_expression_list
@@ -701,6 +705,14 @@ declaration
 		$$.cg_nd = new Node;
 		$$.cg_nd->decl = new Declaration(type, $3.cg_nd->vars);
 	}
+	| POINT IDENTIFIER ':' INT_CONST ',' INT_CONST EOL
+	{
+		cout <<$1.sem_nd.name<<"-"<<endl;
+		$$.cg_nd = new Node;
+		Variables * vec;
+		$$.cg_nd->decl = new Declaration(type, vec);
+	}
+	//| conic_specifier IDENTIFIER ':' initializer ',' initializer ',' initializer ',' initializer ',' initializer ',' initializer EOL
 	;
 
 mulendoflines
@@ -740,12 +752,6 @@ init_declarator
 		$$.cg_nd = new Node;
 		$$.cg_nd->var = new Variable($1.sem_nd.name, type, $3.cg_nd->ass_expr);
 	}
-	| declarator ':' initializer_list 	{ $$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "INIT_DECLR"); strcpy($$.sem_nd.type, $1.sem_nd.type); }
-	;
-
-initializer_list
-	: initializer						{ $$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "INIT_LIST"); strcpy($$.sem_nd.type, $1.sem_nd.type);}
-	| initializer_list ',' initializer	{ $$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "INIT_LIST"); strcpy($$.sem_nd.type, $3.sem_nd.type);}
 	;
 
 declarator
@@ -860,6 +866,6 @@ int main(int argc, char* argv[])
 	printtree(head);
 	if(root){
 		root->traverse();
-		root->codegen();
+		// root->codegen();
 	}
 }
