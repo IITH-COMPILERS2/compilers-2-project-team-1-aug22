@@ -454,3 +454,400 @@ Point* Conic::focii()
     cout << "Focii doesn't exist for this conic" << endl;
     return NULL;
 }
+
+double Line::slope()
+{
+    return -1*f / g;
+}
+
+double Circle::radius()
+{
+    return ((sqrt(g * g + f * f - a * c)) / a);
+}
+
+double Circle::circumf()
+{
+    double r = ((sqrt(g * g + f * f - a * c)) / a);
+    return 2 * pi * r;
+}
+
+double Circle::area_cir()
+{
+    double r = ((sqrt((g * g) + (f * f) - (a * c))) / a);
+    return pi * r * r;
+}
+
+Point* Circle::focii()
+{
+    return this->center();
+}
+
+
+
+Line* Parabola::directrix()
+{
+    Line* l1;
+    if (a == 0 && h == 0)
+    {
+        l1 = new Line(0, 0, 0, 1, 0, (g + (f * f - c) / g));
+    }
+    else if (b == 0 && h == 0)
+    {
+        l1 = new Line(0, 0, 0, 0, 1, (f + (g * g - f) / c));
+    }
+    else
+    {
+        cout << "Directrix call in parabola doesn't have a standard form equation.\n";
+        return NULL;
+    }
+    return l1;
+}
+
+Line* Parabola::p_axis()
+{
+    Line* l;
+    if (a==0 && h==0)
+    {
+        l = new Line(0, 0, 0, 0, 1, -2*f/b);
+        return l;
+    }
+    else if (b==0 && h==0)
+    {
+        l = new Line(0, 0, 0, 1, 0, -2*g/a);
+        return l;
+    }
+    
+    cout << "Parabola not in standard form" <<endl;
+    return NULL;
+}
+
+double Parabola::latus_rectum()
+{
+    if (a==0 && h==0)
+    {
+        return -2*g/b;
+    }
+    else if (b==0 && h==0)
+    {
+        return -2*f/a;
+    }
+
+    cout << "Parabola not in standard form" << endl;
+    return NULL;
+}
+
+Point* Parabola::vertex()
+{
+    double x = -1*(g/a);
+    double y = -1*(f/b);
+    Point* p = new Point(x, y);
+    return p;
+}
+
+double Parabola::focal_chord(Point* p)
+{
+    double x = p->x;
+    double y = p->y;
+    double t = 2*(y/x);
+    if (a==0 && h == 0){
+        return (-(pow((g/b)*(t+(1/t)),2))/2);
+    }
+    else if (b==0 && h == 0){
+        return (-(pow((f/a)*(t+(1/t)),2))/2);
+    }
+    else{
+        cout << "Parabola not in standard form";         
+        return NULL;
+    }
+}
+
+Point* Parabola::focii()
+{
+    if (a==0 && h==0)
+    {
+        Point* p = new Point((((c-f*f)*b)/(2*g)) - (g)/(2*b), 0-f);
+        return p;
+    }
+    else if (b==0 && h==0)
+    {
+        Point* p = new Point(0-g, (((c-g*g)*a)/(2*f)) - (f)/(2*a));
+        return p;
+    }
+
+    cout << "Parabola not in standard form" << endl;
+    return NULL;
+}
+
+double Ellipse::len_maj_axis()
+{
+    if (a < b)
+    {
+        return 2 * sqrt(b);
+    }
+    else if (a > b)
+    {
+        return 2 * sqrt(a);
+    }
+
+    return -1;
+}
+
+double Ellipse::len_min_axis()
+{
+    if (a < b)
+    {
+        return 2 * sqrt(a);
+    }
+    else if (a > b)
+    {
+        return 2 * sqrt(b);
+    }
+
+    return -1;
+}
+
+double Ellipse::latus_rectum()
+{
+    if (a > b)
+    {
+        return 2 * a / sqrt(b);
+    }
+    else if (a < b)
+    {
+        return 2 * b / sqrt(a);
+    }
+
+    return -1;
+}
+
+Circle* Ellipse::dir_circle()
+{
+    Circle* c = new Circle(1, 0, 1, g / a, f / b, ((g * g) / (a * a)) + ((f * f) / (b * b)) - a - b);
+    return c;
+}
+
+Circle* Ellipse::aux_circle()
+{
+    if (a < b)
+    {
+        Circle* c = new Circle(1, 0, 1, 0, 0, -1 * b);
+        return c;
+    }
+    else if (a > b)
+    {
+        Circle* c = new Circle(1, 0, 1, 0, 0, -1 * a);
+        return c;
+    }
+
+
+    return NULL;
+}
+
+double Ellipse::circumf()
+{
+    return pi * (sqrt(a) + sqrt(b));
+}
+
+double Ellipse::area()
+{
+    return pi * (sqrt(a) * sqrt(b));
+}
+
+Line* Ellipse::directrix()
+{
+    Line* l1;
+    if(a>b){
+        l1 = new Line(0, 0, 0, 0, 1, 2*((a/(sqrt(a-b))) - (f/b)));
+    }
+    else if(a<b){
+        l1 = new Line(0, 0, 0, 1, 0, 2*((b/(sqrt(b-a))) - (g/a)));
+    }
+    else{
+        cout << "Directrix call in ellipse doesn't have a standard form equation.\n";
+        return NULL;
+    }
+    return l1;
+}
+
+Line* Ellipse::p_axis()
+{
+    if (a>b)
+    {
+        Line* l = new Line(0, 0, 0, 0, 1, -2*f/a);
+        return l;
+    }
+    else if (a<b)
+    {
+        Line* l = new Line(0, 0, 0, 1, 0, -2*g/a);
+        return l;
+    }
+    
+    cout << "Ellipse not in standard from" << endl;
+    return NULL;
+}
+
+Point* Ellipse::vertex()
+{
+    Point* p;
+    if (a>b){
+        p = new Point(0.0, sqrt(a));
+    }
+    else if (a<b){
+        p = new Point(sqrt(b), 0.0);
+    }
+    else{
+        cout << "Ellipse not in standard form\n";          
+        return NULL;
+    }
+    return p;
+}
+
+Point* Ellipse::focus()
+{
+    Point* p1;
+    if (a>b){
+        p1 = new Point(0- g/(b*b), sqrt(a-b) - (f/(a*a)));
+    }
+    else if (a<b){
+        p1 = new Point(sqrt(b-a)-(g/(b*b)), 0 - (f/(a*a)));
+    }
+    else{
+        cout << "Ellipse not in standard form";       
+        return NULL;
+    }
+    return p1;
+}
+
+Line* Hyperbola::trans_axis()
+{
+    if (a > 0)
+    {
+        Line* l = new Line(0, 0, 0, 0, 1, 0);
+        return l;
+    }
+    else
+    {
+        Line* l = new Line(0, 0, 0, 1, 0, 0);
+        return l;
+    }
+}
+
+Line* Hyperbola::conj_axis()
+{
+    if (a > 0)
+    {
+        Line* l = new Line(0, 0, 0, 1, 0, 0);
+        return l;
+    }
+    else
+    {
+        Line* l = new Line(0, 0, 0, 0, 1, 0);
+        return l;
+    }
+}
+
+Circle* Hyperbola::dir_circle()
+{
+    Circle* c = new Circle(1, 0, 1, 0, 0, -(b - a));
+    return c;
+}
+
+Circle* Hyperbola::aux_circle()
+{
+    Circle* c = new Circle(1, 0, 1, 0, 0, b);
+    return c;
+}
+
+Line_pair* Hyperbola::asymptotes()
+{
+    Line_pair* l = new Line_pair(a, b, 0, 0, 0, 0);
+    return l;
+}
+
+
+Line* Hyperbola::directrix()
+{
+    Line* l1;
+    if (a>0) {
+        l1 = new Line(0, 0, 0, 1, 0, 2*((b/(sqrt(a-b))) - (g/a)));
+    }
+    else if (b>0) {
+        l1 = new Line(0, 0, 0, 0, 1, 2*((a/(sqrt(b-a))) - (f/b)));
+    }
+    else{
+        cout << "Directrix call in hyperbola doesn't have a standard form equation.\n";
+        return NULL;
+    }
+    return l1;
+}
+
+double Hyperbola::latus_rectum()
+{
+    if (c>0)
+    {
+        a *= -1;
+        b *= -1;
+    }
+    
+    if (a>0)
+    {
+        return 2*a/sqrt(b);
+    }
+    else if (b>0)
+    {
+        return 2*b/sqrt(a);
+    }
+
+    return -1;
+}
+
+Line* Hyperbola::p_axis()
+{
+    if (a>0)
+    {
+        Line* l = new Line(0, 0, 0, 1, 0, -2*g/a);
+        return l;
+    }
+    else if (b>0)
+    {
+        Line* l = new Line(0, 0, 0, 0, 1, -2*f/b);
+        return l;
+    }
+    cout << "Hyperbola not in standard form" << endl;
+    return NULL;
+    
+}
+
+Point* Hyperbola::vertex()
+{
+    Point* p;
+    if (a>0) {
+        p = new Point(sqrt(-b), 0.0);
+    }
+    else if (b>0){
+        p = new Point(0.0, sqrt(-a)); 
+    }
+    else{
+        cout << "Hyperbola not in standard form\n";          
+        return NULL;
+    }
+    return p;
+}
+
+Point* Hyperbola::focus()
+{
+    Point* p1;
+    if(a>0){
+        p1 = new Point(sqrt(a-b) - (g/(b*b)),(f / (a*a)));
+    }
+    else if(b>0) {
+        p1 = new Point((g/(b*b)), sqrt(b-a) - f/(a*a));
+    }
+    else{
+        cout << "Hyperbola not in standard form\n";      
+        return NULL;
+    }
+    return p1;
+}
+
+#endif
