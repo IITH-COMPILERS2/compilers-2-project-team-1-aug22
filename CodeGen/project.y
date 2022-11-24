@@ -1,6 +1,7 @@
 %{
 	#include "../Semantics.hpp"
 	#include "../AST.hpp"
+	#include "../functions.hpp"
     void yyerror(string s);
     int yylex();
     int yywrap();
@@ -47,8 +48,8 @@
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
   argument_expression_list statement_list statement /*declaration_list*/ declaration 
-  mulendoflines init_declarator_list init_declarator declarator function_call
-  direct_declarator identifier_list initializer selection_statement iteration_statement jump_statement exit input output temp_fun
+  mulendoflines init_declarator_list init_declarator declarator jump_statement exit input output temp_fun
+  direct_declarator identifier_list initializer selection_statement iteration_statement 
 
 %type <obj> '=' '+' '-' '!'
 
@@ -227,8 +228,14 @@ assignment_expression
 		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "ASS_EXPR");
 		strcpy($$.sem_nd.type, $1.sem_nd.type);
 		$$.cg_nd = new Node;
-		$$.cg_nd->ass_expr = new Assignment_expr($1.cg_nd->cond_expr);
-		$$.cg_nd->cond_expr = $1.cg_nd->cond_expr;
+		if($1.cg_nd->num == 7){
+			$$.cg_nd->num = $1.cg_nd->num;
+			$$.cg_nd->function_call = $1.cg_nd->function_call;
+		}
+		else{
+			$$.cg_nd->ass_expr = new Assignment_expr($1.cg_nd->cond_expr);
+			$$.cg_nd->cond_expr = $1.cg_nd->cond_expr;
+		}
 	}
 	| unary_expression assignment_operator assignment_expression
 	{
@@ -529,23 +536,25 @@ postfix_expression
 		$$.cg_nd = new Node;
 		$$.cg_nd->cond_expr = new Conditional_expr($1.cg_nd->loc);
 	}
-	;
-
-function_call
-	: IDENTIFIER '(' ')'
+	| IDENTIFIER '(' ')'
 	{
 		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "POSTFIX_EXPR");
 		strcpy($$.sem_nd.type, $1.sem_nd.type);
 		$$.cg_nd = new Node;
+		// $$.cg_nd->num = 7;
 		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name);
+		$$.cg_nd->cond_expr = new Conditional_expr($$.cg_nd->function_call);
 	}
 	| IDENTIFIER '(' argument_expression_list ')'
 	{
 		$$.sem_nd.nd = mknode($1.sem_nd.nd, $3.sem_nd.nd, "POSTFIX_EXPR");
 		$$.cg_nd = new Node;
+		// $$.cg_nd->num = 7;
 		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name, fun_call_params);
+		$$.cg_nd->cond_expr = new Conditional_expr($$.cg_nd->function_call);
 		// fun_call_params.clear();
 	}
+	| IDENTIFIER '.' IDENTIFIER '(' ')'
 	| IDENTIFIER '.' IDENTIFIER '(' argument_expression_list ')'
 	;
 
@@ -647,6 +656,10 @@ statement
 			//cout << "hi:(\n";
 			//$$.cg_nd->stmt = new Assignment_expr();
 		}
+		else if($1.cg_nd->num == 7){
+			// cout << "hai\n";
+			$$.cg_nd->stmt = $1.cg_nd->function_call;
+		}
 		else{
 			$$.cg_nd->stmt = $1.cg_nd->ass_expr;
 			// cout << "hi3\n";
@@ -666,14 +679,11 @@ statement
 		$$.cg_nd->stmt = $1.cg_nd->loopstmt;
 		// cout << "hi5\n";
 	}
-	| function_call
-	{
-		$$.cg_nd = new Node;
-		$$.cg_nd->stmt = $1.cg_nd->function_call;
-	}
 	| jump_statement
 	{
 		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "STAT");
+		$$.cg_nd = new Node;
+		$$.cg_nd->stmt = $1.cg_nd->exit;
 		// $$.cg_nd = $1.cg_nd;
 	}
 	| input
@@ -707,10 +717,10 @@ declaration
 	}
 	| POINT IDENTIFIER ':' INT_CONST ',' INT_CONST EOL
 	{
-		cout <<$1.sem_nd.name<<"-"<<endl;
+		cout << $1.sem_nd.name << " " << $4.sem_nd.name << " " << $6.sem_nd.name << endl;
+		points[string($1.sem_nd.name)] = new Point(stoi($1.sem_nd.name), stoi($1.sem_nd.name));
 		$$.cg_nd = new Node;
-		Variables * vec;
-		$$.cg_nd->decl = new Declaration(type, vec);
+		$$.cg_nd->decl = new Declaration();
 	}
 	//| conic_specifier IDENTIFIER ':' initializer ',' initializer ',' initializer ',' initializer ',' initializer ',' initializer EOL
 	;
@@ -820,17 +830,24 @@ jump_statement
 	| EXIT exit
 	{
 		$$.sem_nd.nd = mknode(NULL, $2.sem_nd.nd, "EXIT_EXPR");
+		$$.cg_nd = $2.cg_nd;
 	}
 	;
 
 exit
 	: EOL
+	{
+		$$.cg_nd = new Node;
+		$$.cg_nd->exit = new Exit();
+	}
 	| ':' expression EOL 
 	{ 
 		$$.sem_nd.nd = mknode(NULL, $2.sem_nd.nd, "EXIT");
 		string a = symbol_table.back()->fun_ret_type;
 		char* c = const_cast<char*>(a.c_str());
 		check_return_types($2.sem_nd.type, c);
+		$$.cg_nd = new Node;
+		$$.cg_nd->exit = new Exit($2.cg_nd->ass_expr);
 	}
 	;
 
@@ -866,6 +883,6 @@ int main(int argc, char* argv[])
 	printtree(head);
 	if(root){
 		root->traverse();
-		// root->codegen();
+		root->codegen();
 	}
 }

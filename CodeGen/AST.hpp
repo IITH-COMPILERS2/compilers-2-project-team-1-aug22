@@ -121,6 +121,7 @@ class Node {
 		class FunctionCall* function_call;
 		class Print* print;
 		class Read* read;
+		class Exit* exit;
 		class Statements* stmts;
 		class Block* block;
 		class Function_Def* func_def;
@@ -204,8 +205,16 @@ class Location: public AstNode {
 				return v;
 			}
 			else{
-				// Value* v = modules[Function_Name]->getNamedGlobal(identifier);
-				Value* v = LocalVars.back()[this->identifier];
+				Value* v;
+				if(is_global_decl){
+					v = ModuleOb->getNamedGlobal(this->identifier);
+				}
+				else{
+					v = ModuleOb->getNamedGlobal(this->identifier);
+					if(v == 0){
+						v = LocalVars.back()[this->identifier];	
+					}
+				}
 				return v;
 			}
 		}
@@ -240,155 +249,6 @@ class Statement: public AstNode {
 		virtual void traverse(){}
 		int interpret();
 		virtual Value *codegen(){}
-};
-
-class Conditional_expr: public Statement {
-	private:
-		class Conditional_expr* lhs;
-		string operand;
-		class Conditional_expr* rhs;
-		class Location* loc;
-	public:
-		Conditional_expr(class Conditional_expr* lhs, string operand, class Conditional_expr* rhs){
-			this->stmt_type = "Cond";
-			this->lhs = lhs;
-			this->operand = operand;
-			this->rhs = rhs;
-		}
-		Conditional_expr(class Location* loc){
-			this->stmt_type = "Unary_Cond";
-			this->loc = loc;
-		}
-		string getType(){
-			return this->stmt_type;
-		}
-		Location* getLocation(){
-			return this->loc;
-		}
-		void traverse(){
-			TBS;
-			cout << "<Conditional>\n";
-			tabs++;
-			if(lhs && rhs){
-				lhs->traverse();
-				tabs++;
-				TBS;
-				cout << "Operand: " << this->operand << "\n";
-				tabs--;
-				rhs->traverse();
-			}
-			if(loc){
-				loc->traverse();
-			}
-			tabs--;
-			TBS;
-			cout << "</Conditional>\n";
-		}
-		void interpret();
-		Value *codegen(){
-			if (this->getType().compare("Unary_Cond") == 0) {
-				Value *v = loc->codegen();
-				if(loc->getType().compare("variable") == 0)
-					v = Builder.CreateLoad(Builder.getInt32Ty(), v, "string");
-				return v;
-			}
-			if (this->getType().compare("Cond") == 0) {
-				Value *left = lhs->codegen();
-				Value *right = rhs->codegen();
-				// if (left == 0) 
-				// 	return reportError::ErrorV("Error in left operand of " + operand);
-				// if (right == 0)
-				// 	return reportError::ErrorV("Error in right operand of " + operand);
-				Value *v;
-				if (operand.compare("+") == 0)
-					v = Builder.CreateAdd(left, right, "addtmp");
-				else if (operand.compare("-") == 0)
-					v = Builder.CreateSub(left, right, "subtmp");
-				else if (operand.compare("*") == 0)
-					v = Builder.CreateMul(left, right, "multmp");
-				else if (operand.compare("/") == 0)
-					v = Builder.CreateUDiv(left, right, "divtmp");
-				else if (operand.compare("%") == 0)
-					v = Builder.CreateURem(left, right, "modtmp");
-				else if (operand.compare("||") == 0)
-					v = Builder.CreateOr(left, right, "ortmp");
-				else if (operand.compare("&&") == 0)
-					v = Builder.CreateAnd(left, right, "andtmp");	
-				else if (operand.compare("<") == 0)
-					v = Builder.CreateICmpULT(left, right, "ltcomparetmp");
-				else if (operand.compare(">") == 0)
-					v = Builder.CreateICmpUGT(left, right, "gtcomparetmp");
-				else if (operand.compare("<=") == 0)
-					v = Builder.CreateICmpULE(left, right, "ltcompareequaltmp");
-				else if (operand.compare(">=") == 0)
-					v = Builder.CreateICmpUGE(left, right, "gtcompareequaltmp");
-				else if (operand.compare("==") == 0)
-					v = Builder.CreateICmpEQ(left, right, "equalcomparetmp");
-				else if (operand.compare("!=") == 0)
-					v = Builder.CreateICmpNE(left, right, "notequalcomparetmp");
-				return v;
-			}
-		}
-};
-
-class Assignment_expr: public Statement {
-	private:
-		class Location* loc;
-		string operand;
-		class Conditional_expr* cond_expr;
-	public:
-		Assignment_expr(class Location* loc, string operand, class Conditional_expr* cond_expr){
-			this->stmt_type = "Ass";
-			this->loc = loc;
-			this->operand = operand;
-			this->cond_expr = cond_expr;
-		}
-		Assignment_expr(class Conditional_expr* cond_expr){
-			this->stmt_type = "Ass";
-			this->loc = NULL;
-			this->cond_expr = cond_expr;
-		}
-		string getType(){
-			return this->stmt_type;
-		}
-		void traverse(){
-			TBS;
-			cout << "<Assignment>\n";
-			tabs++;
-			if(loc)
-				this->loc->traverse();
-			this->cond_expr->traverse();
-			tabs--;
-			TBS;
-			cout << "</Assignment>\n";
-		}
-		void interpret();
-		Value *codegen(){
-			if(loc){
-				Value* lhs = loc->codegen();
-				Value *rhs = cond_expr->codegen();
-				Value *v = Builder.CreateStore(rhs, lhs);
-				return v;
-				if(operand == "+="){
-					Value* newrhs = Builder.CreateAdd(lhs, rhs, "AddAss");
-					Value *v = Builder.CreateStore(newrhs, lhs);
-					return v;
-				}
-				else if(operand == "*="){
-					Value* newrhs = Builder.CreateMul(lhs, rhs, "MulAss");
-					Value *v = Builder.CreateStore(newrhs, lhs);
-					return v;
-				}
-				else{
-					Value *v = Builder.CreateStore(rhs, lhs);
-					return v;
-				}
-			}
-			else{
-				Value *v = cond_expr->codegen();
-				return v;
-			}
-		}
 };
 
 class FunctionCall: public Statement {
@@ -437,7 +297,7 @@ class FunctionCall: public Statement {
 					// Value* v = Builder.CreateStore(v1, v2);
 					// Constant * C = dyn_cast<Constant*>(V);
 					//LocalVars.back()[i]->getType()->print(llvm::outs());
-					args.push_back(Builder.CreateLoad(Builder.getInt32Ty(), LocalVars.back()[i], "dummy"));
+					args.push_back(Builder.CreateLoad(Builder.getInt32Ty(), LocalVars.back()[i], "args"));
 					// args.push_back(ConstantInt::get(Context, APInt(32, 5)));
 					// args.push_back(ConstantInt::get(Context, v));
 					// args.push_back(Builder.getInt32(5));
@@ -456,9 +316,170 @@ class FunctionCall: public Statement {
 				// CallInst *caller = CallInst::Create(modules[Function_Name]->getOrInsertFunction(name, FunType[name]), args, name);
 				// Builder.GetInsertBlock()->getInstList().push_back(caller);
 				// return caller;
-				Builder.CreateCall(ModuleOb->getFunction(name), args, "call");
+				CallInst* ret = Builder.CreateCall(ModuleOb->getFunction(name), args, "call");
+				return ret;
 			}
 			// LocalVars.pop_back();
+		}
+};
+
+class Conditional_expr: public Statement {
+	private:
+		class Conditional_expr* lhs;
+		string operand;
+		class Conditional_expr* rhs;
+		class Location* loc;
+		class FunctionCall* fun_call;
+	public:
+		Conditional_expr(class Conditional_expr* lhs, string operand, class Conditional_expr* rhs){
+			this->stmt_type = "Cond";
+			this->lhs = lhs;
+			this->operand = operand;
+			this->rhs = rhs;
+		}
+		Conditional_expr(class FunctionCall* fun_call){
+			this->stmt_type = "Function_call";
+			this->fun_call = fun_call;
+		}
+		Conditional_expr(class Location* loc){
+			this->stmt_type = "Unary_Cond";
+			this->loc = loc;
+		}
+		string getType(){
+			return this->stmt_type;
+		}
+		Location* getLocation(){
+			return this->loc;
+		}
+		void traverse(){
+			TBS;
+			cout << "<Conditional>\n";
+			tabs++;
+			if(lhs && rhs){
+				lhs->traverse();
+				tabs++;
+				TBS;
+				cout << "Operand: " << this->operand << "\n";
+				tabs--;
+				rhs->traverse();
+			}
+			if(loc){
+				loc->traverse();
+			}
+			if(fun_call){
+				fun_call->traverse();
+			}
+			tabs--;
+			TBS;
+			cout << "</Conditional>\n";
+		}
+		void interpret();
+		Value *codegen(){
+			if (this->getType().compare("Unary_Cond") == 0) {
+				Value *v = loc->codegen();
+				if(loc->getType().compare("variable") == 0)
+					v = Builder.CreateLoad(Builder.getInt32Ty(), v, "string");
+				return v;
+			}
+			else if (this->getType().compare("Cond") == 0) {
+				Value *left = lhs->codegen();
+				Value *right = rhs->codegen();
+				// if (left == 0) 
+				// 	return reportError::ErrorV("Error in left operand of " + operand);
+				// if (right == 0)
+				// 	return reportError::ErrorV("Error in right operand of " + operand);
+				Value *v;
+				if (operand.compare("+") == 0)
+					v = Builder.CreateAdd(left, right, "addtmp");
+				else if (operand.compare("-") == 0)
+					v = Builder.CreateSub(left, right, "subtmp");
+				else if (operand.compare("*") == 0)
+					v = Builder.CreateMul(left, right, "multmp");
+				else if (operand.compare("/") == 0)
+					v = Builder.CreateUDiv(left, right, "divtmp");
+				else if (operand.compare("%") == 0)
+					v = Builder.CreateURem(left, right, "modtmp");
+				else if (operand.compare("||") == 0)
+					v = Builder.CreateOr(left, right, "ortmp");
+				else if (operand.compare("&&") == 0)
+					v = Builder.CreateAnd(left, right, "andtmp");	
+				else if (operand.compare("<") == 0)
+					v = Builder.CreateICmpULT(left, right, "ltcomparetmp");
+				else if (operand.compare(">") == 0)
+					v = Builder.CreateICmpUGT(left, right, "gtcomparetmp");
+				else if (operand.compare("<=") == 0)
+					v = Builder.CreateICmpULE(left, right, "ltcompareequaltmp");
+				else if (operand.compare(">=") == 0)
+					v = Builder.CreateICmpUGE(left, right, "gtcompareequaltmp");
+				else if (operand.compare("==") == 0)
+					v = Builder.CreateICmpEQ(left, right, "equalcomparetmp");
+				else if (operand.compare("!=") == 0)
+					v = Builder.CreateICmpNE(left, right, "notequalcomparetmp");
+				return v;
+			}
+			else if (this->getType().compare("Function_call") == 0){
+				// Value* v = Builder.CreateLoad(Builder.getInt32Ty(), fun_call->codegen());
+				return fun_call->codegen();
+			}
+		}
+};
+
+class Assignment_expr: public Statement {
+	private:
+		class Location* loc;
+		string operand;
+		class Conditional_expr* cond_expr;
+	public:
+		Assignment_expr(class Location* loc, string operand, class Conditional_expr* cond_expr){
+			this->stmt_type = "Ass";
+			this->loc = loc;
+			this->operand = operand;
+			this->cond_expr = cond_expr;
+		}
+		Assignment_expr(class Conditional_expr* cond_expr){
+			this->stmt_type = "Ass";
+			this->loc = NULL;
+			this->cond_expr = cond_expr;
+		}
+		string getType(){
+			return this->stmt_type;
+		}
+		void traverse(){
+			TBS;
+			cout << "<Assignment>\n";
+			tabs++;
+			if(loc)
+				this->loc->traverse();
+			this->cond_expr->traverse();
+			tabs--;
+			TBS;
+			cout << "</Assignment>\n";
+		}
+		void interpret();
+		Value *codegen(){
+			if(loc){
+				Value* lhs = loc->codegen();
+				Value *rhs = cond_expr->codegen();
+				Value *v = Builder.CreateStore(rhs, lhs);
+				if(operand == "+="){
+					Value* newrhs = Builder.CreateAdd(lhs, rhs, "AddAss");
+					Value *v = Builder.CreateStore(newrhs, lhs);
+					return v;
+				}
+				else if(operand == "*="){
+					Value* newrhs = Builder.CreateMul(lhs, rhs, "MulAss");
+					Value *v = Builder.CreateStore(newrhs, lhs);
+					return v;
+				}
+				else{
+					Value *v = Builder.CreateStore(rhs, lhs);
+					return v;
+				}
+			}
+			else{
+				Value *v = cond_expr->codegen();
+				return v;
+			}
 		}
 };
 
@@ -530,12 +551,16 @@ class Variable: public AstNode {
 						Builder.CreateStore(ConstantFP::get(Context, APFloat(double(0))), alloc);
 					}
 					LocalVars.back()[this->identifier] = alloc;
-					Value *v = ConstantInt::get(Context, APInt(32, 0));
-					return v;
+					return alloc;
 				}
 				else{
-					// Value* v = modules[Function_Name]->getNamedGlobal(this->identifier);
-					Value* v = LocalVars.back()[this->identifier];
+					Value* v;
+					if(is_global_decl){
+						v = ModuleOb->getNamedGlobal(this->identifier);
+					}
+					else{
+						v = LocalVars.back()[this->identifier];
+					}
 					return v;
 				}
 			}
@@ -547,11 +572,16 @@ class Declaration: public Statement {
 	private:
 		string type;
 		vector<Variable*> variables;
+		bool isInbuilt;
 	public:
+		Declaration(){
+			isInbuilt = 1;
+		}
 		Declaration(string type, class Variables* vars){
 			this->stmt_type = "Decl";
 			this->type = type;
 			this->variables = vars->getVariables();
+			isInbuilt = 0;
 		}
 		string getType(){
 			return this->stmt_type;
@@ -575,37 +605,42 @@ class Declaration: public Statement {
 		};
 		int interpret();
 		Value *codegen(){
-			for (int i = 0; i < variables.size(); i++) {
-				class Variable *variable = variables[i];
-				if(is_global_decl){
-					ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
-					GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
-					gvar->setLinkage(GlobalValue::CommonLinkage);
-					// gvar->setAlignment(4);
-					ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
-					gvar->setInitializer(const_int_val);
-					variables[i]->codegen();
-				}
-				else{
-					// modules[Function_Name]->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
-					// GlobalVariable *gvar = modules[Function_Name]->getNamedGlobal(variable->getIdentifier());
-					// gvar->setLinkage(GlobalValue::CommonLinkage);
-					// gvar->setAlignment(4);
-					// ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
-					// gvar->setInitializer(const_int_val);
-					auto alloc = Builder.CreateAlloca(ConvertTypes(variable->getType()));
-					if(variable->getType() == "int"){
-						Builder.CreateStore(Builder.getInt32(0), alloc);
-					} else if(variable->getType() == "double"){
-						Builder.CreateStore(ConstantFP::get(Context, APFloat(double(0))), alloc);
+			if(!isInbuilt){
+				for (int i = 0; i < variables.size(); i++) {
+					class Variable *variable = variables[i];
+					if(is_global_decl){
+						ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
+						GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
+						gvar->setLinkage(GlobalValue::CommonLinkage);
+						gvar->setAlignment(4);
+						ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
+						gvar->setInitializer(const_int_val);
+						variables[i]->codegen();
 					}
-					LocalVars.back()[variable->getIdentifier()] = alloc;
-					// Builder.CreateStore(Builder.getInt32(45), alloc);
-					variables[i]->codegen();
+					else{
+						// modules[Function_Name]->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
+						// GlobalVariable *gvar = modules[Function_Name]->getNamedGlobal(variable->getIdentifier());
+						// gvar->setLinkage(GlobalValue::CommonLinkage);
+						// gvar->setAlignment(4);
+						// ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
+						// gvar->setInitializer(const_int_val);
+						auto alloc = Builder.CreateAlloca(ConvertTypes(variable->getType()));
+						if(variable->getType() == "int"){
+							Builder.CreateStore(Builder.getInt32(0), alloc);
+						} else if(variable->getType() == "double"){
+							Builder.CreateStore(ConstantFP::get(Context, APFloat(double(0))), alloc);
+						}
+						LocalVars.back()[variable->getIdentifier()] = alloc;
+						// Builder.CreateStore(Builder.getInt32(45), alloc);
+						variables[i]->codegen();
+					}
 				}
+				Value *v = ConstantInt::get(Context, APInt(32, 1));
+				return v;
+			} else{
+				Value* v = ConstantInt::get(Context, APInt(32, 1));
+				return v;
 			}
-			Value *v = ConstantInt::get(Context, APInt(32, 1));
-			return v;
 		}
 };
 
@@ -798,7 +833,7 @@ class Print:public Statement {
 				args.push_back(x);
 				type.push_back(x->getType());
 				v = value->codegen();
-				v = Builder.CreateLoad(Builder.getInt32Ty(), v,"raja");
+				v = Builder.CreateLoad(Builder.getInt32Ty(), v,"loc");
 				// if (v == 0) {
 				// 	errors++;
 				// 	reportError::ErrorV("Unknown Variable in PRINT");
@@ -840,6 +875,38 @@ class Read:public Statement {
 			llvm::FunctionType *FType = FunctionType::get(Type::getInt32Ty(Context), typeargs, false);
 			auto readfunc = ModuleOb->getOrInsertFunction("scanf", FType);
 			return Builder.CreateCall(readfunc,refargs);
+		}
+};
+
+class Exit: public Statement {
+	private:
+		bool isAss;
+		class Assignment_expr* ass_expr;
+	public:
+		Exit(){
+			isAss = 0;
+		}
+		Exit(Assignment_expr* ass_expr){
+			this->ass_expr = ass_expr;
+			isAss = 1;
+		}
+		void traverse(){
+			TBS;
+			tabs++;
+			cout << "<Exit>\n";
+			ass_expr->traverse();
+			tabs--;
+			TBS;
+			cout << "</Exit>\n";
+		}
+		Value *codegen(){
+			if(isAss){
+				//Value* v = Builder.CreateLoad(Builder.getInt32Ty(), ass_expr->codegen());
+				Builder.CreateRet(ass_expr->codegen());
+			}
+			else{
+				Builder.CreateRet(Builder.getInt32(0));
+			}
 		}
 };
 
@@ -950,20 +1017,21 @@ class Start:public AstNode {
 		Value *codegen(){
 			cout<<"------Code Generation------"<<endl;
 			Value *v = ConstantInt::get(Context, APInt(32, 0));
-			ModuleOb = new Module("Main", Context);
+			ModuleOb = new Module("CoPro", Context);
 			// modules[Function_Name] = modules["main"];
 			// BasicBuildLLVMMain(modules[Function_Name]);
 			//field_declarations->codegen();
 			//statements->codegen();
 			//cout << nodes.size() << "\n";
+			vector<Declaration*> vec_decl;
 			for(auto i : nodes){
 				if(i){
 					if(i->decl){
 						is_global_decl = 1;
-						i->decl->codegen();
+						vec_decl.push_back(i->decl);
+						// i->decl->codegen();
 					}
 					if(i->func_def){
-						is_global_decl = 0;
 						// string id = "local";
 
 						
@@ -975,12 +1043,19 @@ class Start:public AstNode {
 							vector<string> params = i->func_def->getParams();
 							// cout << params.size() << "----------------\n";
 							BasicBuildLLVMMain(ModuleOb, i->func_def->getNameFun(), i->func_def->getisParam(), params, i->func_def->getReturnType());
+							if(is_global_decl)
+							{
+								for(auto j : vec_decl){
+									j->codegen();
+								}
+							}
+							is_global_decl = 0;
 							map<string, AllocaInst*> mp;
 							LocalVars.push_back(mp);
 							// auto alloc = Builder.CreateAlloca(Builder.getInt32Ty());
 							// Builder.CreateStore(Builder.getInt32(45), alloc);
 							i->func_def->codegen();
-							Builder.CreateRet(Builder.getInt32(0));
+							// Builder.CreateRet(Builder.getInt32(0));
 							// modules[Function_Name]->print(llvm::errs(), nullptr);
 							// // BasicBuildLLVMMain(ModuleOb, i->func_def->getNameFun());
 							// // i->func_def->codegen();

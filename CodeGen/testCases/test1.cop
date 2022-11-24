@@ -1,11 +1,16 @@
+int ravi = 10, rama = 5
+
 fun: int b->int
 <<
     int p = 10
     output: "The Value of p is"
     output: p
+    b = b + 1
     output: "The Value of b is"
     output: b
+    exit : b
 >>
+
 
 main->int
 <<
@@ -35,8 +40,15 @@ main->int
         output: p
     >>
 
-    fun(b)
+    b = fun(b) + 1
     int c = b + 2
     output: "Value of c is"
     output: c
+    rama = rama + 4
+    output: rama
+
+
+    point q : 1, 2
+
+    exit : 0
 >>
