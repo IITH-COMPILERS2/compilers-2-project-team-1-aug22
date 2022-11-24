@@ -1,7 +1,11 @@
 #ifndef CONIC_H
 #define CONIC_H
 
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
+#include <iostream>
+#include <cmath>
+#include <map>
+#include <string>
 
 // if(!NULL) checking
 
@@ -19,24 +23,28 @@ class Ellipse;
 class Hyperbola;
 class circle;
 
-Line* function_temp(double,double,double,double,double,double);
-
 class Point
 {
 public:
     double x;
     double y;
-    Point(double _x, double _y)
-    {
-        x = _x;
-        y = _y;
-    }
-    Point(int _x, int _y)
-    {
-        x = _x;
-        y = _y;
-    }
+    Point(double _x, double _y);
+    Point(int _x, int _y);
 };
+
+
+Point::Point(double _x, double _y)
+{
+    x = _x;
+    y = _y;
+};
+
+Point::Point(int _x, int _y)
+{
+    x = _x;
+    y = _y;
+};
+
 
 class Conic
 {
@@ -47,728 +55,402 @@ public:
     double c;
     double g;
     double f;
-    Conic(double _a, double _h, double _b, double _g, double _f, double _c)
-    {
-        a = _a;
-        h = _h;
-        b = _b;
-        g = _g;
-        f = _f;
-        c = _c;
-    }
-    string eq_()
-    {
-        string s1 = "";
-        string s2 = "";
-        string s3 = "";
-        string s4 = "";
-        string s5 = "";
-        if (b >= 0)
-        {
-            s1 = "+";
-        }
-        if (h >= 0)
-        {
-            s2 = "+";
-        }
-        if (g >= 0)
-        {
-            s3 = "+";
-        }
-        if (f >= 0)
-        {
-            s4 = "+";
-        }
-        if (c >= 0)
-        {
-            s5 = "+";
-        }
-        string s = to_string(a) + "x^2" + s1 + to_string(b) + "y^2" + s2 + to_string((2 * h)) + "xy" + s3 + to_string((2 * g)) + "x" + s4 + to_string((2 * f)) + "y" + s5 + to_string(c);
-    }
-    Conic* tangent(Point* p)
-    {
-        double c2;
-        double x_ = p->x;
-        double y_ = p->y;
-        if ((b * y_ + h * x_ + f) == 0)
-        {
-            c2 = x_;
-            Conic* l1 = new Conic(0, 0, 0, -1, 0, c2);
-            return l1;
-        }
-        double m = -(a * x_ + h * y_ + g) / (b * y_ + h * x_ + f);
-        c2 = y_ - m * x_;
-        Conic* l1 = new Conic(0, 0, 0, m, -1, c2);
-        return l1;
-    }
-    Conic* normal(Point* p)
-    {
-        double c2;
-        Conic* l1;
-        double x_ = p->x;
-        double y_ = p->y;
-        if ((a * x_ + h * y_ + g) == 0)
-        {
-            c2 = x_;
-            l1 = new Conic(0, 0, 0, -1, 0, c2);
-            return l1;
-        }
-        double m = (b * y_ + h * x_ + f) / (a * x_ + h * y_ + g);
-        c2 = y_ - m * x_;
-        l1 = new Conic(0, 0, 0, m, -1, c2);
-        return l1;
-    }
-    Point* center()
-    {
-        double x = ((f * h - b * g) / (a * b - h * h));
-        double y = ((g * h - a * f) / (a * b - h * h));
-        Point* temp = new Point(x, y);
-        return temp;
-    }
-    bool on_curve(Point* p1)
-    {
-        int x = p1->x;
-        int y = p1->y;
-        double temp = a * x * x + 2 * h * x * y + b * y * y + 2 * g * x + 2 * f * y + c;
-        if (temp == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    double delta()
-    {
-        double temp = (a * b * c + 2 * f * g * h - a * f * f - b * g * g - c * h * h);
-        return temp;
-    }
-    double eccen()
-    {
-        double p = 2 * h;
-        double d = 2 * g;
-        double e = 2 * f;
-        double temp;
-        double m = sqrt((a - b) * (a - b) + p * p);
-        double n = f * (p * p - 4 * a * b) + a * e * e - p * d * e + b * d * d;
-        if (n > 1)
-        {
-            temp = 2*m / (m + a + b);
-        }
-        else if (n < 1)
-        {
-            temp = 2*m / (m - a - b);
-        }
-        else
-        {
-            cout << "Invalid call to eccentricity function\n";
-            return 0.0;
-        }
-        return temp;
-    }
-    string conic_name()
-    {
-        double d = (a * b * c + 2 * f * g * h - a * f * f - b * g * g - c * h * h);
-        string ret;
-        if (d == 0)
-        {
-            if (h == 0 && a * b > 0)
-            {
-                ret = "Point";
-            }
-            if (h * h == a * b && g * f == h * c)
-            {
-                ret = "Line";
-            }
-            else if ((a * b - h * h) <= 0)
-            {
-                ret = "Pair of lines";
-            }
-        }
-        else
-        {
-            double tmp = (h * h) - (a * b);
-            if (h == 0 && a == b)
-            {
-                ret = "Circle";
-            }
-            else if (tmp == 0)
-            {
-                ret = "Parabola";
-            }
-            else if (tmp < 0)
-            {
-                ret = "Ellipse";
-            }
-            else
-            {
-                ret = "Hyperbola";
-            }
-        }
-        return ret;
-    }
-
-    Conic* p_axis()
-    {
-        string name = this->conic_name();
-        Conic* l;
-
-        if (name == "Parabola")
-        {
-            function_temp(this->a, this->h, this->b, this->g, this->f, this->c);
-        }
-        else if (name == "Ellipse")
-        {
-            Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-            l = e->p_axis();
-            return l;
-        }
-        else if(name == "Hyperbola")
-        {
-            Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-            l = h->p_axis();
-            return l;
-        }
-        
-        cout << "Principal axis doesn't exist for this conic" << endl;
-        return NULL;
-    }
-
-    Conic* latus_rectum()
-    {
-        string name = this->conic_name();
-        Conic* l;
-
-        if (name == "Parabola")
-        {
-            Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
-            l = p->latus_rectum();
-            return l;
-        }
-        else if (name == "Ellipse")
-        {
-            Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-            l = e->latus_rectum();
-            return l;
-        }
-        else if (name == "Hyperbola")
-        {
-            Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-            l = h->latus_rectum;
-            return l;
-        }
-        cout << "Latus rectum doesn't exist for this conic" << endl;
-        return NULL;
-    }
-    
-    Conic* directrix(){
-        string test = this->conic_name();
-        Conic* l1;
-        if(test == "Parabola"){
-            Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
-            l1 = p->directrix();
-        }
-        else if(test == "Ellipse"){
-            Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-            l1 = e->directrix();
-        }
-        else if(test == "Hyperbola"){
-            Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-            l1 = h->directrix();
-        }
-        else{
-            cout << "Directrix doesn't exist for this conic\n";
-            return NULL;
-        }
-        return l1;
-    }
-
-    Point* vertex(){
-        string test = this->conic_name();
-        Point* p1;
-        if(test == "Parabola"){
-            Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
-            p1 = p->vertex();
-        }
-        else if(test == "Ellipse"){
-            Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-            p1 = e->vertex();
-        }
-        else if(test == "Hyperbola"){
-            Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-            p1 = h->vertex();
-        }
-        else{
-            cout << "Vertex doesn't exist for this conic\n";
-            return NULL;
-        }
-        return p1;
-    }
-
-    Point* focii()
-    {
-        string name = this->conic_name();
-        Point* pt;
-        if (name == "Circle")
-        {
-            Circle* c = new Circle(this->a, this->h, this->b, this->g, this->f, this->c);
-            pt = c->focii();
-            return pt;
-        }
-        if (name == "Parabola")
-        {
-            Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
-            pt = p->focii();
-            return pt;
-        }
-        else if (name == "Ellipse")
-        {
-            Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-            pt = e->focii();
-            return pt;
-        }
-        else if (name == "Hyperbola")
-        {
-            Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-            pt = h->focii();
-            return pt;
-        }
-        
-        cout << "Focii doesn't exist for this conic" << endl;
-        return NULL;
-    }
-
+    Conic(double _a, double _h, double _b, double _g, double _f, double _c);
+    string eq_();
+    Line* tangent(Point* p);
+    Line* normal(Point* p);
+    Point* center();
+    bool on_curve(Point* p1);
+    double delta();
+    double eccen();
+    string conic_name();
+    Conic* p_axis();
+    double latus_rectum();
+    Conic* directrix();
+    Point* vertex();
+    Point* focii();
 };
-
-class Parabola : public Conic
-{
-public:
-    Parabola(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c) {}
-
-    double focal_chord(Point* p)
-    {
-        double t = 2 * (p->y / p->x);
-        if (a == 0 && h == 0)
-        {
-            return -(pow((g / b) * (t + (1 / t)),2)) / 2;
-        }
-        else if (b == 0 and h == 0)
-        {
-            return -(pow((f / a) * (t + (1 / t)),2)) / 2;
-        }
-        else
-        {
-            cout << "Parabola not in standard form" << endl;
-            return NULL;
-        }
-    }
-
-    Line* directrix()
-    {
-        Line* l1;
-        if (a == 0 && h == 0)
-        {
-            l1 = new Line(0, 0, 0, 1, 0, (g + (f * f - c) / g));
-        }
-        else if (b == 0 && h == 0)
-        {
-            l1 = new Line(0, 0, 0, 0, 1, (f + (g * g - f) / c));
-        }
-        else
-        {
-            cout << "Directrix call in parabola doesn't have a standard form equation.\n";
-            return NULL;
-        }
-        return l1;
-    }
-
-    Line* p_axis()
-    {
-        Line* l;
-        if (a==0 && h==0)
-        {
-            l = new Line(0, 0, 0, 0, 1, -2*f/b);
-            return l;
-        }
-        else if (b==0 && h==0)
-        {
-            l = new Line(0, 0, 0, 1, 0, -2*g/a);
-            return l;
-        }
-        
-        cout << "Parabola not in standard form" <<endl;
-        return NULL;
-    }
-
-    double latus_rectum()
-    {
-        if (a==0 && h==0)
-        {
-            return -2*g/b;
-        }
-        else if (b==0 && h==0)
-        {
-            return -2*f/a;
-        }
-
-        cout << "Parabola not in standard form" << endl;
-        return NULL;
-    }
-
-    Point* vertex(){
-        double x = -1*(g/a);
-        double y = -1*(f/b);
-        Point* p = new Point(x, y);
-        return p;
-    }
-
-    double focal_chord(Point* p){
-        double x = p->x;
-        double y = p->y;
-        double t = 2*(y/x);
-        if (a==0 && h == 0){
-            return (-(pow((g/b)*(t+(1/t)),2))/2);
-        }
-        else if (b==0 and h == 0){
-            return (-(pow((f/a)*(t+(1/t)),2))/2);
-        }
-        else{
-            cout << "Parabola not in standard form";         
-            return NULL;
-        }
-    }
-
-    Point* focii()
-    {
-        if (a==0 && h==0)
-        {
-            Point* p = new Point((((c-f*f)*b)/(2*g)) - (g)/(2*b), 0-f);
-            return p;
-        }
-        else if (b==0 && h==0)
-        {
-            Point* p = new Point(0-g, (((c-g*g)*a)/(2*f)) - (f)/(2*a));
-            return p;
-        }
-
-        cout << "Parabola not in standard form" << endl;
-        return NULL;
-    }
-}
-
 
 class Line : public Conic
 {
 public:
     Line(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c) {}
-    double slope() { return -1 * f / g ;}
+    double slope();
 
-}
+};
 
-Line* function_temp(double a, double h, double b, double g, double f, double c){
-    Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
-    Line* l = p.p_axis();
-    return l;
-}
+// Line* function_temp(double a, double h, double b, double g, double f, double c){
+//     Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
+//     Line* l = p.p_axis();
+//     return l;
+// };
+
+
+Line* function_temp(double,double,double,double,double,double);
 
 class Line_pair : public Conic
 {
 public:
-    Line_pair(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c) {}
-
-}
+    Line_pair(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c){}
+};
 
 class Circle : public Conic
 {
 public:
     Circle(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c) {}
 
-    double radius()
-    {
-        return ((sqrt(g * g + f * f - a * c)) / a);
-    }
-    double circumf()
-    {
-        double r = ((sqrt(g * g + f * f - a * c)) / a);
-        return 2 * pi * r;
-    }
-    double area_cir()
-    {
-        double r = ((sqrt(g * g + f * f - a * c)) / a);
-        return pi * r * r;
-    }
+    double radius();
+    double circumf();
+    double area_cir();
+    Point* focii();
+};
 
-    Point* focii()
-    {
-        return this->center();
-    }
-}
+class Parabola : public Conic
+{
+public:
+    Parabola(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c){};
+    double focal_chord(Point* p);
+    Line* directrix();
+    Line* p_axis();
+    double latus_rectum();
+    Point* vertex();
+    Point* focii();
+};
 
-
-
-class Ellipse : class Conic
+class Ellipse : public Conic
 {
 public:
     Ellipse(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c) {}
+    double len_maj_axis();
+    double len_min_axis();
+    double latus_rectum();
+    Circle* dir_circle();
+    Circle* aux_circle();
+    double circumf();
+    double area();
+    Line* directrix();
+    Line* p_axis();
+    Point* vertex();
+    Point* focus();
+};
 
-    double len_maj_axis()
-    {
-        if (a < b)
-        {
-            return 2 * sqrt(b);
-        }
-        else if (a > b)
-        {
-            return 2 * sqrt(a);
-        }
-    }
-
-    double len_min_axis()
-    {
-        if (a < b)
-        {
-            return 2 * sqrt(a);
-        }
-        else if (a > b)
-        {
-            return 2 * sqrt(b);
-        }
-    }
-
-    double latus_rectum()
-    {
-        if (a > b)
-        {
-            return 2 * a / sqrt(b);
-        }
-        else if (a < b)
-        {
-            return 2 * b / sqrt(a);
-        }
-    }
-
-    Circle* dir_circle()
-    {
-        Circle* c = new Circle(1, 0, 1, g / a, f / b, ((g * g) / (a * a)) + ((f * f) / (b * b)) - a - b);
-        return c;
-    }
-
-    Circle* aux_circle()
-    {
-        if (a < b)
-        {
-            Circle* c = new Circle(1, 0, 1, 0, 0, -1 * b);
-            return c;
-        }
-        else if (a > b)
-        {
-            Circle* c = new Circle(1, 0, 1, 0, 0, -1 * a);
-            return c;
-        }
-    }
-
-    double circumf()
-    {
-        return pi * (sqrt(a) + sqrt(b));
-    }
-
-    double area()
-    {
-        return pi * (sqrt(a) * sqrt(b));
-    }
-    
-    Line* directrix(){
-        Line* l1;
-        if(a>b){
-            l1 = new Line(0, 0, 0, 0, 1, 2*((a/(sqrt(a-b))) - (f/b)));
-        }
-        else if(a<b){
-            l1 = new Line(0, 0, 0, 1, 0, 2*((b/(sqrt(b-a))) - (g/a)));
-        }
-        else{
-            cout << "Directrix call in ellipse doesn't have a standard form equation.\n";
-            return NULL;
-        }
-        return l1;
-    }
-    
-    Line* p_axis()
-    {
-        if (a>b)
-        {
-            Line* l = new Line(0, 0, 0, 0, 1, -2*f/a);
-            return l;
-        }
-        else if (a<b)
-        {
-            Line* l = new Line(0, 0, 0, 1, 0, -2*g/a);
-            return l;
-        }
-        
-        cout << "Ellipse not in standard from" << endl;
-        return NULL;
-    }
-
-    Point* vertex(){
-        Point* p;
-        if (a>b){
-            p = new Point(0, sqrt(a));
-        }
-        else if (a<b){
-            p = new Point(sqrt(b), 0);
-        }
-        else{
-            cout << "Ellipse not in standard form\n";          
-            return NULL;
-        }
-        return p;
-    }
-
-    Point* focus(){
-        Point* p1;
-        if (a>b){
-            p1 = new Point(0- g/(b*b), sqrt(a-b) - (f/(a*a)));
-        }
-        else if (a<b){
-            p1 = new Point(sqrt(b-a)-(g/(b*b)), 0 - (f/(a*a)));
-        }
-        else{
-            cout << "Ellipse not in standard form";       
-            return NULL;
-        }
-        return p1;
-    }
-}
-
-class Hyperbola : class Conic
+class Hyperbola : public Conic
 {
 public:
     Hyperbola(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _h, _c) {}
-    Line* trans_axis()
-    {
-        if (a > 0)
-        {
-            Line* l = new Line(0, 0, 0, 0, 1, 0);
-            return l;
-        }
-        else
-        {
-            Line* l = new Line(0, 0, 0, 1, 0, 0);
-            return l;
-        }
-    }
+    Line* trans_axis();
+    Line* conj_axis();
+    Circle* dir_circle();
+    Circle* aux_circle();
+    Line_pair* asymptotes();
+    Line* directrix();
+    double latus_rectum();
+    Line* p_axis();
+    Point* vertex();
+    Point* focus();
+};
 
-    Line* conj_axis()
-    {
-        if (a > 0)
-        {
-            Line* l = new Line(0, 0, 0, 1, 0, 0);
-            return l;
-        }
-        else
-        {
-            Line* l = new Line(0, 0, 0, 0, 1, 0);
-            return l;
-        }
-    }
 
-    Circle* dir_circle()
-    {
-        Circle* c = new Circle(1, 0, 1, 0, 0, -(b - a));
-        return c;
-    }
+Conic::Conic(double _a, double _h, double _b, double _g, double _f, double _c)
+{
+    a = _a;
+    h = _h;
+    b = _b;
+    g = _g;
+    f = _f;
+    c = _c;
+}
 
-    Circle* aux_circle()
+string Conic::eq_()
+{
+    string s1 = "";
+    string s2 = "";
+    string s3 = "";
+    string s4 = "";
+    string s5 = "";
+    if (b >= 0)
     {
-        Circle* c = new Circle(1, 0, 1, 0, 0, b);
-        return c;
+        s1 = "+";
     }
-
-    Line_pair* asymptotes()
+    if (h >= 0)
     {
-        Line_pair* l = new Line_pair(a, b, 0, 0, 0, 0);
-        return l
+        s2 = "+";
     }
+    if (g >= 0)
+    {
+        s3 = "+";
+    }
+    if (f >= 0)
+    {
+        s4 = "+";
+    }
+    if (c >= 0)
+    {
+        s5 = "+";
+    }
+    string s = to_string(a) + "x^2" + s1 + to_string(b) + "y^2" + s2 + to_string((2 * h)) + "xy" + s3 + to_string((2 * g)) + "x" + s4 + to_string((2 * f)) + "y" + s5 + to_string(c);
+    return s;
+}
 
-    Line* directrix(){
-        Line* l1;
-        if (a>0) {
-            l1 = new Line(0, 0, 0, 1, 0, 2*((b/(sqrt(a-b))) - (g/a)));
-        }
-        else if (b>0) {
-            l1 = new Line(0, 0, 0, 0, 1, 2*((a/(sqrt(b-a))) - (f/b)));
-        }
-        else{
-            cout << "Directrix call in hyperbola doesn't have a standard form equation.\n";
-            return NULL;
-        }
+Line* Conic::tangent(Point* p)
+{
+    double c2;
+    double x_ = p->x;
+    double y_ = p->y;
+    if ((b * y_ + h * x_ + f) == 0)
+    {
+        c2 = x_;
+        Line* l1 = new Line(0, 0, 0, -1, 0, c2);
         return l1;
     }
+    double m = -(a * x_ + h * y_ + g) / (b * y_ + h * x_ + f);
+    c2 = y_ - m * x_;
+    Line* l1 = new Line(0, 0, 0, m, -1, c2);
+    return l1;
+}
 
-    double latus_rectum()
+Line* Conic::normal(Point* p)
+{
+    double c2;
+    Line* l1;
+    double x_ = p->x;
+    double y_ = p->y;
+    if ((a * x_ + h * y_ + g) == 0)
     {
-        if (c>0)
-        {
-            a *= -1;
-            b *= -1;
-        }
-        
-        if (a>0)
-        {
-            return 2*a/sqrt(b);
-        }
-        else if (b>0)
-        {
-            return 2*b/sqrt(a);
-        }
+        c2 = x_;
+        l1 = new Line(0, 0, 0, -1, 0, c2);
+        return l1;
     }
+    double m = (b * y_ + h * x_ + f) / (a * x_ + h * y_ + g);
+    c2 = y_ - m * x_;
+    l1 = new Line(0, 0, 0, m, -1, c2);
+    return l1;
+}
 
-    Line* p_axis()
+Point* Conic::center()
+{
+    double x = ((f * h - b * g) / (a * b - h * h));
+    double y = ((g * h - a * f) / (a * b - h * h));
+    Point* temp = new Point(x, y);
+    return temp;
+}
+
+bool Conic::on_curve(Point* p1)
+{
+    int x = p1->x;
+    int y = p1->y;
+    double temp = a * x * x + 2 * h * x * y + b * y * y + 2 * g * x + 2 * f * y + c;
+    if (temp == 0)
     {
-        if (a>0)
-        {
-            Line* l = new Line(0, 0, 0, 1, 0, -2*g/a);
-            return l;
-        }
-        else if (b>0)
-        {
-            Line* l = new Line(0, 0, 0, 0, 1, -2*f/b);
-            return l;
-        }
-        cout << "Hyperbola not in standard form" << endl;
-        return NULL;
-        
+        return true;
     }
-
-    Point* vertex(){
-        Point* p;
-        if (a>0) {
-            p = new Point(sqrt(-b), 0);
-        }
-        else if (b>0){
-            p = new Point(0, sqrt(-a)); 
-        }
-        else{
-            cout << "Hyperbola not in standard form\n";          
-            return NULL;
-        }
-        return p;
-    }
-
-    Point* focus(){
-        Point* p1;
-        if(a>0){
-            p1 = new Point(sqrt(a-b) - (g/(b*b)),(f / (a*a)));
-        }
-        else if(b>0) {
-            p1 = new Point((g/(b*b)), sqrt(b-a) - f/(a*a));
-        }
-        else{
-            cout << "Hyperbola not in standard form\n";      
-            return NULL;
-        }
-        return p1;
+    else
+    {
+        return false;
     }
 }
-#endif
+
+double Conic::delta()
+{
+    double temp = (a * b * c + 2 * f * g * h - a * f * f - b * g * g - c * h * h);
+    return temp;
+}
+
+double Conic::eccen()
+{
+    double p = 2 * h;
+    double d = 2 * g;
+    double e = 2 * f;
+    double temp;
+    double m = sqrt((a - b) * (a - b) + p * p);
+    double n = f * (p * p - 4 * a * b) + a * e * e - p * d * e + b * d * d;
+    if (n > 1)
+    {
+        temp = 2*m / (m + a + b);
+    }
+    else if (n < 1)
+    {
+        temp = 2*m / (m - a - b);
+    }
+    else
+    {
+        cout << "Invalid call to eccentricity function\n";
+        return 0.0;
+    }
+    return temp;
+}
+
+string Conic::conic_name()
+{
+    double d = (a * b * c + 2 * f * g * h - a * f * f - b * g * g - c * h * h);
+    string ret;
+    if (d == 0)
+    {
+        if (h == 0 && a * b > 0)
+        {
+            ret = "Point";
+        }
+        if (h * h == a * b && g * f == h * c)
+        {
+            ret = "Line";
+        }
+        else if ((a * b - h * h) <= 0)
+        {
+            ret = "Pair of lines";
+        }
+    }
+    else
+    {
+        double tmp = (h * h) - (a * b);
+        if (h == 0 && a == b)
+        {
+            ret = "Circle";
+        }
+        else if (tmp == 0)
+        {
+            ret = "Parabola";
+        }
+        else if (tmp < 0)
+        {
+            ret = "Ellipse";
+        }
+        else
+        {
+            ret = "Hyperbola";
+        }
+    }
+    return ret;
+}
+
+Conic* Conic::p_axis()
+{
+    string name = this->conic_name();
+    Conic* l;
+
+    if (name == "Parabola")
+    {
+        function_temp(this->a, this->h, this->b, this->g, this->f, this->c);
+    }
+    else if (name == "Ellipse")
+    {
+        Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
+        l = e->p_axis();
+        return l;
+    }
+    else if(name == "Hyperbola")
+    {
+        Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
+        l = h->p_axis();
+        return l;
+    }
+    
+    cout << "Principal axis doesn't exist for this conic" << endl;
+    return NULL;
+}
+
+double Conic::latus_rectum()
+{
+    string name = this->conic_name();
+    double l;
+
+    if (name == "Parabola")
+    {
+        Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
+        l = p->latus_rectum();
+        return l;
+    }
+    else if (name == "Ellipse")
+    {
+        Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
+        l = e->latus_rectum();
+        return l;
+    }
+    else if (name == "Hyperbola")
+    {
+        Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
+        l = h->latus_rectum();
+        return l;
+    }
+    cout << "Latus rectum doesn't exist for this conic" << endl;
+    return NULL;
+}
+
+Conic* Conic::directrix()
+{
+    string test = this->conic_name();
+    Conic* l1;
+    if(test == "Parabola"){
+        Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
+        l1 = p->directrix();
+    }
+    else if(test == "Ellipse"){
+        Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
+        l1 = e->directrix();
+    }
+    else if(test == "Hyperbola"){
+        Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
+        l1 = h->directrix();
+    }
+    else{
+        cout << "Directrix doesn't exist for this conic\n";
+        return NULL;
+    }
+    return l1;
+}
+
+ Point* Conic::vertex()
+ {
+    string test = this->conic_name();
+    Point* p1;
+    if(test == "Parabola"){
+        Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
+        p1 = p->vertex();
+    }
+    else if(test == "Ellipse"){
+        Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
+        p1 = e->vertex();
+    }
+    else if(test == "Hyperbola"){
+        Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
+        p1 = h->vertex();
+    }
+    else{
+        cout << "Vertex doesn't exist for this conic\n";
+        return NULL;
+    }
+    return p1;
+}
+
+
+Point* Conic::focii()
+{
+    string name = this->conic_name();
+    Point* pt;
+    if (name == "Circle")
+    {
+        Circle* c = new Circle(this->a, this->h, this->b, this->g, this->f, this->c);
+        pt = c->focii();
+        return pt;
+    }
+    if (name == "Parabola")
+    {
+        Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
+        pt = p->focii();
+        return pt;
+    }
+    else if (name == "Ellipse")
+    {
+        Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
+        pt = e->focii();
+        return pt;
+    }
+    else if (name == "Hyperbola")
+    {
+        Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
+        pt = h->focii();
+        return pt;
+    }
+    
+    cout << "Focii doesn't exist for this conic" << endl;
+    return NULL;
+}
