@@ -5,4 +5,5 @@ main->int
     int d = a - b
     int e = a * b
     int f = a / b
+    exit: 0
 >>

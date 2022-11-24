@@ -39,7 +39,7 @@ main->int
         p = p - 1
         output: p
     >>
-
+    
     b = fun(b) + 1
     int c = b + 2
     output: "Value of c is"
@@ -47,6 +47,10 @@ main->int
     rama = rama + 4
     output: rama
 
+    int d = 15
+    d += 15
+    d *= 2
+    output : d
 
     point q : 1, 2
 
