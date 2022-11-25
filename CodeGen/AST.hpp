@@ -613,7 +613,7 @@ class Declaration: public Statement {
 						ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
 						GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
 						gvar->setLinkage(GlobalValue::CommonLinkage);
-						gvar->setAlignment(4);
+						gvar->setAlignment((MaybeAlign)4);
 						ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
 						gvar->setInitializer(const_int_val);
 						variables[i]->codegen();

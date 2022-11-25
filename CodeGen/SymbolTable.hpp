@@ -9,6 +9,7 @@ using namespace std;
 int q;
 string type;
 int value = 1;
+int sign = 1;
 string ret_type;
 extern int line_no;
 int sem_errors = 0;
