@@ -12,7 +12,7 @@
 using namespace std;
 double pi = 2 * acos(0.0);
 
-map<string, class Conic *> conic_ids;
+map<string, class Conic*> conics;
 map<string, class Point*> points;
 
 class Conic;
@@ -86,7 +86,7 @@ public:
 // };
 
 
-Line* function_temp(double,double,double,double,double,double);
+// Line* function_temp(double,double,double,double,double,double);
 
 class Line_pair : public Conic
 {
@@ -329,7 +329,9 @@ Conic* Conic::p_axis()
 
     if (name == "Parabola")
     {
-        function_temp(this->a, this->h, this->b, this->g, this->f, this->c);
+        Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
+        Line* l = p->p_axis();
+        return l;
     }
     else if (name == "Ellipse")
     {

@@ -345,6 +345,7 @@ class Conditional_expr: public Statement {
 			this->stmt_type = "Unary_Cond";
 			this->loc = loc;
 		}
+		Conditional_expr(){}
 		string getType(){
 			return this->stmt_type;
 		}
@@ -458,21 +459,21 @@ class Assignment_expr: public Statement {
 		void interpret();
 		Value *codegen(){
 			if(loc){
-				Value* lhs = loc->codegen();
+				Value *lhs = loc->codegen();
 				Value *rhs = cond_expr->codegen();
-				Value *v = Builder.CreateStore(rhs, lhs);
+				Value *val = Builder.CreateLoad(Builder.getInt32Ty(), lhs, "LoadAss");
 				if(operand == "+="){
-					Value* newrhs = Builder.CreateAdd(lhs, rhs, "AddAss");
-					Value *v = Builder.CreateStore(newrhs, lhs);
+					Value* newrhs = Builder.CreateAdd(val, rhs, "AddAss");
+					Value* v = Builder.CreateStore(newrhs, lhs);
 					return v;
 				}
 				else if(operand == "*="){
-					Value* newrhs = Builder.CreateMul(lhs, rhs, "MulAss");
-					Value *v = Builder.CreateStore(newrhs, lhs);
+					Value* newrhs = Builder.CreateMul(val, rhs, "MulAss");
+					Value* v = Builder.CreateStore(newrhs, lhs);
 					return v;
 				}
 				else{
-					Value *v = Builder.CreateStore(rhs, lhs);
+					Value* v = Builder.CreateStore(rhs, lhs);
 					return v;
 				}
 			}
@@ -802,12 +803,18 @@ class Print:public Statement {
 	private:
 		string text;
 		class Location *value;
+		class Assignment_expr *ass_expr;
 		string type;
 	public:
 		Print(class Location * value){
 			this->stmt_type = string("print");
 			this->type = string("loc");
 			this->value = value;
+		}
+		Print(class Assignment_expr* ass_expr){
+			this->stmt_type = string("print");
+			this->type = string("Ass");
+			this->ass_expr = ass_expr;
 		}
 		Print(string text){
 			this->stmt_type = string("print");
@@ -821,19 +828,44 @@ class Print:public Statement {
 			vector <Value *> args;
 			vector <Type *> type;
 			string s;
-			if (this->type.compare("str")==0) {
-				s = text+"\n";
+			if (this->type.compare("str") == 0) {
+				s = text.substr(1, text.size() - 2);
+				if(s.substr(s.size() - 2, 2) == "\\n"){
+					// cout << "Hai\n";
+					s = s.substr(0, s.size() - 2);
+					s += "\n";
+				}
 				Value* x = Builder.CreateGlobalStringPtr(s);
 				args.push_back(x);
 				type.push_back(x->getType());
 			}
-			else if (this->type.compare("loc")==0) {
+			else if (this->type.compare("loc") == 0) {
 				s = "%d\n";
 				Value* x = Builder.CreateGlobalStringPtr(s);
 				args.push_back(x);
 				type.push_back(x->getType());
 				v = value->codegen();
 				v = Builder.CreateLoad(Builder.getInt32Ty(), v,"loc");
+				// if (v == 0) {
+				// 	errors++;
+				// 	reportError::ErrorV("Unknown Variable in PRINT");
+				// }
+				args.push_back(v);
+				type.push_back(v->getType());
+			}
+			else if(this->type.compare("Ass") == 0){
+				s = "%d\n";
+				// s = text.substr(1, text.size() - 2);
+				// if(s.substr(s.size() - 2, 2) == "\\n"){
+				// 	// cout << "Hai\n";
+				// 	s = s.substr(0, s.size() - 2);
+				// 	s += "\n";
+				// }
+				Value* x = Builder.CreateGlobalStringPtr(s);
+				args.push_back(x);
+				type.push_back(x->getType());
+				v = ass_expr->codegen();
+				//v = Builder.CreateLoad(Builder.getInt32Ty(), v,"loc");
 				// if (v == 0) {
 				// 	errors++;
 				// 	reportError::ErrorV("Unknown Variable in PRINT");

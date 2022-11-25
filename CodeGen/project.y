@@ -232,6 +232,13 @@ assignment_expression
 			$$.cg_nd->num = $1.cg_nd->num;
 			$$.cg_nd->function_call = $1.cg_nd->function_call;
 		}
+		else if($1.cg_nd->num == 2){
+			$$.cg_nd->num = 7;
+			$$.cg_nd->function_call = $1.cg_nd->function_call;
+		}
+		else if($1.cg_nd->num == 4){
+			$$.cg_nd = $1.cg_nd;
+		}
 		else{
 			$$.cg_nd->ass_expr = new Assignment_expr($1.cg_nd->cond_expr);
 			$$.cg_nd->cond_expr = $1.cg_nd->cond_expr;
@@ -533,8 +540,13 @@ postfix_expression
 	{
 		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "POSTFIX_EXPR"); 
 		strcpy($$.sem_nd.type, $1.sem_nd.type);
-		$$.cg_nd = new Node;
-		$$.cg_nd->cond_expr = new Conditional_expr($1.cg_nd->loc);
+		if($1.cg_nd->num == 2 || $1.cg_nd->num == 4){
+			$$.cg_nd = $1.cg_nd;
+		}
+		else{
+			$$.cg_nd = new Node;
+			$$.cg_nd->cond_expr = new Conditional_expr($1.cg_nd->loc);
+		}
 	}
 	| IDENTIFIER '(' ')'
 	{
@@ -555,7 +567,17 @@ postfix_expression
 		// fun_call_params.clear();
 	}
 	| IDENTIFIER '.' IDENTIFIER '(' ')'
+	{
+		string id1 = string($1.sem_nd.name);
+		string id2 = string($3.sem_nd.name);
+		cout << conics[id1]->eq_();
+		$$.cg_nd = new Node;
+		$$.cg_nd->cond_expr = new Conditional_expr();
+	}
 	| IDENTIFIER '.' IDENTIFIER '(' argument_expression_list ')'
+	{
+
+	}
 	;
 
 argument_expression_list
@@ -613,7 +635,17 @@ primary_expression
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location(string($1.sem_nd.name), 1);
 	}
-	| '(' expression ')' { $$.sem_nd.nd = mknode($2.sem_nd.nd, NULL, "PRIM_EXPR"); }
+	| '(' expression ')'
+	{
+		$$.sem_nd.nd = mknode($2.sem_nd.nd, NULL, "PRIM_EXPR");
+		$$.cg_nd = new Node;
+		$$.cg_nd = $2.cg_nd;
+		if($2.cg_nd->num == 7){
+			$$.cg_nd->num = 2;
+		} else{
+			$$.cg_nd->num = 4;
+		}
+	}
 	;
 
 statement_list
@@ -717,12 +749,31 @@ declaration
 	}
 	| POINT IDENTIFIER ':' INT_CONST ',' INT_CONST EOL
 	{
-		cout << $1.sem_nd.name << " " << $4.sem_nd.name << " " << $6.sem_nd.name << endl;
-		points[string($1.sem_nd.name)] = new Point(stoi($1.sem_nd.name), stoi($1.sem_nd.name));
+		// cout << $1.sem_nd.name << " " << $4.sem_nd.name << " " << $6.sem_nd.name << endl;
+		points[string($2.sem_nd.name)] = new Point(stod($4.sem_nd.name), stod($6.sem_nd.name));
 		$$.cg_nd = new Node;
 		$$.cg_nd->decl = new Declaration();
 	}
-	//| conic_specifier IDENTIFIER ':' initializer ',' initializer ',' initializer ',' initializer ',' initializer ',' initializer EOL
+	| conic_specifier IDENTIFIER ':' INT_CONST ',' INT_CONST ',' INT_CONST ',' INT_CONST ',' INT_CONST ',' INT_CONST EOL
+	{
+		// cout << $1.sem_nd.name << " " << $4.sem_nd.name << " " << $6.sem_nd.name << endl;
+		string type = string($1.sem_nd.name);
+		if(type == "conic"){
+			conics[string($2.sem_nd.name)] = new Conic(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		} else if(type == "parabola"){
+			conics[string($2.sem_nd.name)] = new Parabola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		} else if(type == "ellipse"){
+			conics[string($2.sem_nd.name)] = new Ellipse(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		} else if(type == "hyperbola"){
+			conics[string($2.sem_nd.name)] = new Hyperbola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		} else if(type == "circle"){
+			conics[string($2.sem_nd.name)] = new Circle(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		} else if(type == "line"){
+			conics[string($2.sem_nd.name)] = new Line(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		}
+		$$.cg_nd = new Node;
+		$$.cg_nd->decl = new Declaration();
+	}
 	;
 
 mulendoflines
@@ -863,6 +914,11 @@ output
 		$$.cg_nd->loc = new Location($3.sem_nd.name, 0);
 		$$.cg_nd->print = new Print($$.cg_nd->loc);
 	}
+	// : OUTPUT ':' assignment_expression
+	// {
+	// 	$$.cg_nd = new Node;
+	// 	$$.cg_nd->print = new Print($3.cg_nd->ass_expr);
+	// }
 	;
 input
 	: INPUT ':' IDENTIFIER

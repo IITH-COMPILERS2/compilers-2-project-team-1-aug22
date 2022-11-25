@@ -3,10 +3,10 @@ int ravi = 10, rama = 5
 fun: int b->int
 <<
     int p = 10
-    output: "The Value of p is"
+    output: "The Value of p is "
     output: p
     b = b + 1
-    output: "The Value of b is"
+    output: "The Value of b is "
     output: b
     exit : b
 >>
@@ -20,16 +20,16 @@ main->int
     output : b
     if(b % 2 == 0)
     <<
-        output: "Value is Even: "
+        output: "Value is Even\n"
     >>
     else
     <<
-        output: "Value is Odd: "
+        output: "Value is Odd\n"
     >>
 
     if(b % 4 == 0)
     <<
-       output: "Value is multiple of 4"
+       output: "Value is multiple of 4\n"
     >>
 
     int p = b
@@ -40,9 +40,9 @@ main->int
         output: p
     >>
     
-    b = fun(b) + 1
+    b = (fun(b)) + 1
     int c = b + 2
-    output: "Value of c is"
+    output: "Value of c is "
     output: c
     rama = rama + 4
     output: rama
@@ -51,6 +51,8 @@ main->int
     d += 15
     d *= 2
     output : d
+
+    output : (3 + 2)
 
     point q : 1, 2
 
