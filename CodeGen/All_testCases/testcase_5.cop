@@ -1,0 +1,17 @@
+main->int
+<<
+    int a = -10, b = -2, c = -3, d = 4
+    a = a + b
+    b = b - a
+    c = c * b * (-10)
+    d = d /(-2)
+    output : "The value of a is "
+    output : a
+    output : "The value of b is "
+    output : b
+    output : "The value of c is "
+    output : c
+    output : "The value of d is "
+    output : d
+    exit : 0
+>>
