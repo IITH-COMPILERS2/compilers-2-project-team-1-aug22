@@ -16,10 +16,18 @@ Tests: Semantic
 	@mkdir AssemblyFiles
 	@mkdir llvmObjects
 	@mkdir gccObjects
-	@./util_files/project < All_testCases/testcase.cop > SymbolTables_ASTs/1.txt 2> llvmOutputs/1.ll
+	@./util_files/project < testCases/test1.cop > SymbolTables_ASTs/1.txt 2> llvmOutputs/1.ll
+	@./util_files/project < testCases/test2.cop > SymbolTables_ASTs/2.txt 2> llvmOutputs/2.ll
+	@./util_files/project < testCases/test3.cop > SymbolTables_ASTs/3.txt 2> llvmOutputs/3.ll
 	@llc -o AssemblyFiles/1.s llvmOutputs/1.ll
+	@llc -o AssemblyFiles/2.s llvmOutputs/2.ll
+	@llc -o AssemblyFiles/3.s llvmOutputs/3.ll
 	@llvm-as -o llvmObjects/1.bc llvmOutputs/1.ll
+	@llvm-as -o llvmObjects/2.bc llvmOutputs/2.ll
+	@llvm-as -o llvmObjects/3.bc llvmOutputs/3.ll
 	@g++ -no-pie AssemblyFiles/1.s -o gccObjects/1.out
+	@g++ -no-pie AssemblyFiles/2.s -o gccObjects/2.out
+	@g++ -no-pie AssemblyFiles/3.s -o gccObjects/3.out
 
 Semantic:
 	@rm -rf util_files
