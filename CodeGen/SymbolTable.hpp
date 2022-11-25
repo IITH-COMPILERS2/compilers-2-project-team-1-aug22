@@ -12,6 +12,7 @@ int value = 1;
 string ret_type;
 int sign = 1;
 int is_identifier_sign = 1;
+bool is_conic_id = 0;
 extern int line_no;
 int sem_errors = 0;
 extern char* yytext;

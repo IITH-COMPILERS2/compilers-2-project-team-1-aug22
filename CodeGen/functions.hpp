@@ -111,9 +111,9 @@ public:
     double delta();
     double eccen();
     string conic_name();
-    Conic* p_axis();
+    Line* p_axis();
     double latus_rectum();
-    Conic* directrix();
+    Line* directrix();
     Point* vertex();
     Point* focii();
 };
@@ -148,7 +148,7 @@ public:
 
     double radius();
     double circumf();
-    double area_cir();
+    double area();
     Point* focii();
 };
 
@@ -236,7 +236,7 @@ string Conic::eq_()
     {
         s5 = "+";
     }
-    string s = (a > 0 ? to_string(int(a)) + "x^2" + s1 : "") + (b > 0 ? to_string(int(b)) + "y^2" + s2 : "") + (h > 0 ? to_string(int(2 * h)) + "xy" + s3 : "") + (g > 0 ? to_string(int(2 * g)) + "x" + s4 : "") + (f > 0 ? to_string(int(2 * f)) + "y"  + s5: "") + (c > 0 ? to_string(int(c)) : "");
+    string s = (a != 0 ? to_string(int(a)) + "x^2" + s1 : "") + (b != 0 ? to_string(int(b)) + "y^2" + s2 : "") + (h != 0 ? to_string(int(2 * h)) + "xy" + s3 : "") + (g != 0 ? to_string(int(2 * g)) + "x" + s4 : "") + (f != 0 ? to_string(int(2 * f)) + "y"  + s5: "") + (c != 0 ? to_string(int(c)) : "");
     return s;
 }
 
@@ -370,10 +370,10 @@ string Conic::conic_name()
     return ret;
 }
 
-Conic* Conic::p_axis()
+Line* Conic::p_axis()
 {
     string name = this->conic_name();
-    Conic* l;
+    // Conic* l;
 
     if (name == "Parabola")
     {
@@ -384,13 +384,13 @@ Conic* Conic::p_axis()
     else if (name == "Ellipse")
     {
         Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-        l = e->p_axis();
+        Line* l = e->p_axis();
         return l;
     }
     else if(name == "Hyperbola")
     {
         Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-        l = h->p_axis();
+        Line* l = h->p_axis();
         return l;
     }
     
@@ -425,27 +425,27 @@ double Conic::latus_rectum()
     return NULL;
 }
 
-Conic* Conic::directrix()
+Line* Conic::directrix()
 {
     string test = this->conic_name();
-    Conic* l1;
+    // Conic* l1;
     if(test == "Parabola"){
         Parabola* p = new Parabola(this->a, this->h, this->b, this->g, this->f, this->c);
-        l1 = p->directrix();
+        Line* l1 = p->directrix();
     }
     else if(test == "Ellipse"){
         Ellipse* e = new Ellipse(this->a, this->h, this->b, this->g, this->f, this->c);
-        l1 = e->directrix();
+        Line* l1 = e->directrix();
     }
     else if(test == "Hyperbola"){
         Hyperbola* h = new Hyperbola(this->a, this->h, this->b, this->g, this->f, this->c);
-        l1 = h->directrix();
+        Line* l1 = h->directrix();
     }
     else{
         cout << "Directrix doesn't exist for this conic\n";
         return NULL;
     }
-    return l1;
+    // return l1;
 }
 
  Point* Conic::vertex()
@@ -521,7 +521,7 @@ double Circle::circumf()
     return 2 * pi * r;
 }
 
-double Circle::area_cir()
+double Circle::area()
 {
     double r = ((sqrt((g * g) + (f * f) - (a * c))) / a);
     return pi * r * r;

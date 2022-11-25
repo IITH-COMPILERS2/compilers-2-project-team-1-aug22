@@ -595,63 +595,87 @@ postfix_expression
 		}
 		else if(id2 == "delta"){
 			if(getConic(id1)){
-				Location* loc = new Location(lines[id1]->delta());
+				Location* loc = new Location(int(conics[id1]->delta()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getLine(id1)){
-				Location* loc = new Location(lines[id1]->delta());
+				Location* loc = new Location(int(lines[id1]->delta()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getCircle(id1)){
-				Location* loc = new Location(lines[id1]->delta());
+				Location* loc = new Location(int(circles[id1]->delta()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getParabola(id1)){
-				Location* loc = new Location(lines[id1]->delta());
+				Location* loc = new Location(int(parabolas[id1]->delta()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getHyperbola(id1)){
-				Location* loc = new Location(lines[id1]->delta());
+				Location* loc = new Location(int(hyperbolas[id1]->delta()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getEllipse(id1)){
-				Location* loc = new Location(lines[id1]->delta());
+				Location* loc = new Location(int(ellipses[id1]->delta()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 		}
 		else if(id2 == "eccen"){
 			if(getConic(id1)){
-				Location* loc = new Location(lines[id1]->eccen());
+				Location* loc = new Location(int(conics[id1]->eccen()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getLine(id1)){
-				Location* loc = new Location(lines[id1]->eccen());
+				Location* loc = new Location(int(lines[id1]->eccen()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getCircle(id1)){
-				Location* loc = new Location(lines[id1]->eccen());
+				Location* loc = new Location(int(circles[id1]->eccen()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getParabola(id1)){
-				Location* loc = new Location(lines[id1]->eccen());
+				Location* loc = new Location(int(parabolas[id1]->eccen()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getHyperbola(id1)){
-				Location* loc = new Location(lines[id1]->eccen());
+				Location* loc = new Location(int(hyperbolas[id1]->eccen()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getEllipse(id1)){
-				Location* loc = new Location(lines[id1]->eccen());
+				Location* loc = new Location(int(ellipses[id1]->eccen()));
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+		}
+		else if(id2 == "latus_rectum"){
+			if(getConic(id1)){
+				Location* loc = new Location(int(conics[id1]->latus_rectum()));
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getParabola(id1)){
+				Location* loc = new Location(int(parabolas[id1]->latus_rectum()));
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getHyperbola(id1)){
+				Location* loc = new Location(int(hyperbolas[id1]->latus_rectum()));
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getEllipse(id1)){
+				Location* loc = new Location(int(ellipses[id1]->latus_rectum()));
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+		}
+		else if(id2 == "area"){
+			if(getCircle(id1)){
+				Location* loc = new Location(int(circles[id1]->area()));
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getEllipse(id1)){
+				Location* loc = new Location(int(ellipses[id1]->area()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 		}
 		//else if(id2 == "")
 		// $$.cg_nd = new Node;
 		// $$.cg_nd->cond_expr = new Conditional_expr();
-	}
-	| IDENTIFIER '.' IDENTIFIER '(' argument_expression_list ')'
-	{
-
 	}
 	;
 
@@ -846,9 +870,121 @@ declaration
 		} else if(type == "hyperbola"){
 			hyperbolas[string($2.sem_nd.name)] = new Hyperbola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		} else if(type == "circle"){
-			circles[string($2.sem_nd.name)] = new Circle(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+			circles[string($2.sem_nd.name)] = new Circle(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name) * -1);
 		} else if(type == "line"){
 			lines[string($2.sem_nd.name)] = new Line(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+		}
+		$$.cg_nd = new Node;
+		$$.cg_nd->decl = new Declaration();
+	}
+	| conic_specifier IDENTIFIER '=' IDENTIFIER '.' IDENTIFIER '(' ')'
+	{
+		string type = string($1.sem_nd.name);
+		string id1 = string($2.sem_nd.name);
+		string id2 = string($4.sem_nd.name);
+		string id3 = string($6.sem_nd.name);
+		if(type == "line"){
+			if(id3 == "p_axis"){
+				if(getConic(id2)){
+					lines[id1] = conics[id2]->p_axis();
+				}
+				else if(getParabola(id2)){
+					lines[id1] = parabolas[id2]->p_axis();
+				}
+				else if(getHyperbola(id2)){
+					lines[id1] = hyperbolas[id2]->p_axis();
+				}
+				else if(getEllipse(id2)){
+					lines[id1] = ellipses[id2]->p_axis();
+				}
+			}
+			else if(id3 == "directrix"){
+				if(getConic(id2)){
+					lines[id1] = conics[id2]->directrix();
+				}
+				else if(getParabola(id2)){
+					lines[id1] = parabolas[id2]->directrix();
+				}
+				else if(getHyperbola(id2)){
+					lines[id1] = hyperbolas[id2]->directrix();
+				}
+				else if(getEllipse(id2)){
+					lines[id1] = ellipses[id2]->directrix();
+				}
+			}
+		}
+		else if(type == "point"){
+			if(id3 == "vertex"){
+				if(getConic(id2)){
+					points[id1] = conics[id2]->vertex();
+				}
+				else if(getParabola(id2)){
+					points[id1] = parabolas[id2]->vertex();
+				}
+				else if(getHyperbola(id2)){
+					points[id1] = hyperbolas[id2]->vertex();
+				}
+				else if(getEllipse(id2)){
+					points[id1] = ellipses[id2]->vertex();
+				}
+			}
+			else if(id3 == "focii"){
+				if(getConic(id2)){
+					points[id1] = conics[id2]->focii();
+				}
+				else if(getParabola(id2)){
+					points[id1] = parabolas[id2]->focii();
+				}
+				else if(getHyperbola(id2)){
+					points[id1] = hyperbolas[id2]->focii();
+				}
+				else if(getEllipse(id2)){
+					points[id1] = ellipses[id2]->focii();
+				}
+				else if(getCircle(id2)){
+					points[id1] = circles[id2]->focii();
+				}
+			}
+		}
+		$$.cg_nd = new Node;
+		$$.cg_nd->decl = new Declaration();
+	}
+	| conic_specifier IDENTIFIER '=' IDENTIFIER '.' IDENTIFIER '(' IDENTIFIER ')'
+	{
+		string type = string($1.sem_nd.name);
+		string id1 = string($2.sem_nd.name);
+		string id2 = string($4.sem_nd.name);
+		string id3 = string($6.sem_nd.name);
+		string id4 = string($8.sem_nd.name);
+		if(type == "line"){
+			if(id3 == "tangent"){
+				if(getConic(id2)){
+					lines[id1] = conics[id2]->tangent(points[id4]);
+				}
+				else if(getParabola(id2)){
+					lines[id1] = parabolas[id2]->tangent(points[id4]);
+				}
+				else if(getHyperbola(id2)){
+					lines[id1] = hyperbolas[id2]->tangent(points[id4]);
+				}
+				else if(getEllipse(id2)){
+					lines[id1] = ellipses[id2]->tangent(points[id4]);
+				}
+			}
+			else if(id3 == "normal"){
+				if(getConic(id2)){
+					lines[id1] = conics[id2]->normal(points[id4]);
+				}
+				else if(getParabola(id2)){
+					lines[id1] = parabolas[id2]->normal(points[id4]);
+				}
+				else if(getHyperbola(id2)){
+					lines[id1] = hyperbolas[id2]->normal(points[id4]);
+				}
+				else if(getEllipse(id2)){
+					lines[id1] = ellipses[id2]->normal(points[id4]);
+				}
+			}
 		}
 		$$.cg_nd = new Node;
 		$$.cg_nd->decl = new Declaration();
