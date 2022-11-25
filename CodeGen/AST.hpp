@@ -399,9 +399,9 @@ class Conditional_expr: public Statement {
 				else if (operand.compare("*") == 0)
 					v = Builder.CreateMul(left, right, "multmp");
 				else if (operand.compare("/") == 0)
-					v = Builder.CreateUDiv(left, right, "divtmp");
+					v = Builder.CreateSDiv(left, right, "divtmp");
 				else if (operand.compare("%") == 0)
-					v = Builder.CreateURem(left, right, "modtmp");
+					v = Builder.CreateSRem(left, right, "modtmp");
 				else if (operand.compare("||") == 0)
 					v = Builder.CreateOr(left, right, "ortmp");
 				else if (operand.compare("&&") == 0)
@@ -615,7 +615,7 @@ class Declaration: public Statement {
 						ModuleOb->getOrInsertGlobal(variable->getIdentifier(), Builder.getInt32Ty());
 						GlobalVariable *gvar = ModuleOb->getNamedGlobal(variable->getIdentifier());
 						gvar->setLinkage(GlobalValue::CommonLinkage);
-						gvar->setAlignment(4);
+						gvar->setAlignment((MaybeAlign)4);
 						ConstantInt* const_int_val = ConstantInt::get(Context, APInt(32,0));
 						gvar->setInitializer(const_int_val);
 						variables[i]->codegen();

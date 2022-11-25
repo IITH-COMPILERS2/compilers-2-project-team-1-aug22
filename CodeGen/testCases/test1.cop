@@ -52,8 +52,6 @@ main->int
     d *= 2
     output : d
 
-    output : (3 + 2)
-
     point q : 1, 2
 
     exit : 0

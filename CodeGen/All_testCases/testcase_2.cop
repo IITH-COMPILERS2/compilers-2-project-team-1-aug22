@@ -1,0 +1,11 @@
+main->int
+<<
+    int a = 10, b = -2, c = -3, d = 4
+    d = a - d
+    b = a - b
+    output : "The value of d is "
+    output : d
+    output : "The value of b is "
+    output : b
+    exit : 0
+>>

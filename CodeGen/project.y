@@ -526,12 +526,17 @@ unary_expression
 		$$.sem_nd.nd = mknode($1.sem_nd.nd, NULL, "UNARY_EXPR"); strcpy($$.sem_nd.type, $1.sem_nd.type);
 		$$.cg_nd = $1.cg_nd;
 	}
-	| unary_operator cast_expression { $$.sem_nd.nd = mknode($1.sem_nd.nd, $2.sem_nd.nd, "UNARY_EXPR"); strcpy($$.sem_nd.type, $2.sem_nd.type); }
+	| unary_operator cast_expression 
+	{ 	
+		$$.sem_nd.nd = mknode($1.sem_nd.nd, $2.sem_nd.nd, "UNARY_EXPR"); 
+		strcpy($$.sem_nd.type, $2.sem_nd.type); 
+		$$.cg_nd = $2.cg_nd;
+	}
 	;
 
 unary_operator
-	: '+'
-	| '-'
+	: '+' 	{sign = 1;}
+	| '-'	{sign = -1;}
 	| '!'
 	;
 
@@ -689,9 +694,6 @@ primary_expression
 		strcpy($$.sem_nd.type, "int"); /*print($$.sem_nd.type);*/ 
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location(stoi($1.sem_nd.name));
-		if(sign == -1){
-			sign = 1;
-		}
 	}
 	| FRAC_CONST
 	{
@@ -704,9 +706,6 @@ primary_expression
 		strcpy($$.sem_nd.type, "double");
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location(stod($1.sem_nd.name));
-		if(sign == -1){
-			sign = 1;
-		}
 	}
 	| STRING_LITERAL
 	{
