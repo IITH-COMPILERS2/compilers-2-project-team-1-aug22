@@ -49,6 +49,8 @@ circle					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yyte
 parabola				{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(PARABOLA); }
 ellipse					{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(ELLIPSE); }
 hyperbola				{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(HYPERBOLA); }
+eq_						{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(EQ_); }
+conic_name				{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(CONIC_NAME); }
 
 
 {L}({L}|{D})*     		{ strcpy(yylval.obj.sem_nd.name,(yytext)); /*yylval.val = strdup(yytext);*/ return(IDENTIFIER); }
