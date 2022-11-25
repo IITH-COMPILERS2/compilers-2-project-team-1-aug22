@@ -1,7 +1,7 @@
 #ifndef CONIC_H
 #define CONIC_H
 
-// #include <bits/stdc++.h>
+#include <bits/stdc++.h>
 #include <iostream>
 #include <cmath>
 #include <map>
@@ -13,7 +13,54 @@ using namespace std;
 double pi = 2 * acos(0.0);
 
 map<string, class Conic*> conics;
+map<string, class Line*> lines;
+map<string, class Parabola*> parabolas;
+map<string, class Hyperbola*> hyperbolas;
+map<string, class Ellipse*> ellipses;
+map<string, class Circle*> circles;
 map<string, class Point*> points;
+
+bool getConic(string s){
+    if(conics[s]){
+        return 1;
+    }
+}
+
+bool getLine(string s){
+    if(lines[s]){
+        return 1;
+    }
+}
+
+bool getCircle(string s){
+    if(circles[s]){
+        return 1;
+    }
+}
+
+bool getParabola(string s){
+    if(parabolas[s]){
+        return 1;
+    }
+}
+
+bool getHyperbola(string s){
+    if(hyperbolas[s]){
+        return 1;
+    }
+}
+
+bool getPoint(string s){
+    if(points[s]){
+        return 1;
+    }
+}
+
+bool getEllipse(string s){
+    if(ellipses[s]){
+        return 1;
+    }
+}
 
 class Conic;
 class Line;
@@ -75,7 +122,7 @@ class Line : public Conic
 {
 public:
     Line(double _a, double _h, double _b, double _g, double _f, double _c) : Conic(_a, _h, _b, _g, _f, _c) {}
-    double slope();
+    int slope();
 
 };
 
@@ -115,6 +162,7 @@ public:
     double latus_rectum();
     Point* vertex();
     Point* focii();
+    double slope();
 };
 
 class Ellipse : public Conic
@@ -188,7 +236,7 @@ string Conic::eq_()
     {
         s5 = "+";
     }
-    string s = to_string(a) + "x^2" + s1 + to_string(b) + "y^2" + s2 + to_string((2 * h)) + "xy" + s3 + to_string((2 * g)) + "x" + s4 + to_string((2 * f)) + "y" + s5 + to_string(c);
+    string s = (a > 0 ? to_string(int(a)) + "x^2" + s1 : "") + (b > 0 ? to_string(int(b)) + "y^2" + s2 : "") + (h > 0 ? to_string(int(2 * h)) + "xy" + s3 : "") + (g > 0 ? to_string(int(2 * g)) + "x" + s4 : "") + (f > 0 ? to_string(int(2 * f)) + "y"  + s5: "") + (c > 0 ? to_string(int(c)) : "");
     return s;
 }
 
@@ -290,11 +338,11 @@ string Conic::conic_name()
         {
             ret = "Point";
         }
-        if (h * h == a * b && g * f == h * c)
+        if (a == 0 && b == 0 && h == 0)
         {
             ret = "Line";
         }
-        else if ((a * b - h * h) <= 0)
+        else
         {
             ret = "Pair of lines";
         }
@@ -457,7 +505,7 @@ Point* Conic::focii()
     return NULL;
 }
 
-double Line::slope()
+int Line::slope()
 {
     return -1*f / g;
 }

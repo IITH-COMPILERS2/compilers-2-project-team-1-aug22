@@ -43,7 +43,8 @@ Type* ConvertTypes(string Type){
 	} else if(Type == "void"){
 		return Builder.getVoidTy();
 	} else if(Type == "string"){
-		return Builder.getInt32Ty();
+		return Builder.getInt8PtrTy();
+		// return Builder.getInt32Ty();
 	} else if(Type == "parabola"){
 
 	}
@@ -198,6 +199,7 @@ class Location: public AstNode {
 				} else if(type == "double"){
 					v = ConstantFP::get(Context, APFloat(dob_val));
 				} else if(type == "string"){
+					// v = Builder.getInt8PtrTy();
 					v = ConstantInt::get(Context, APInt(32, int_val));
 				} else if(type == "bool"){
 					v = ConstantInt::get(Context, APInt(32, bool_val));
@@ -805,6 +807,7 @@ class Print:public Statement {
 		class Location *value;
 		class Assignment_expr *ass_expr;
 		string type;
+		bool check;
 	public:
 		Print(class Location * value){
 			this->stmt_type = string("print");
@@ -820,6 +823,13 @@ class Print:public Statement {
 			this->stmt_type = string("print");
 			this->type = string("str");
 			this->text = text;
+			this->check = 0;
+		}
+		Print(string text, bool check){
+			this->stmt_type = string("print");
+			this->type = string("str");
+			this->text = text;
+			this->check = check;
 		}
 		void traverse(){}
 		int interpret();
@@ -829,15 +839,28 @@ class Print:public Statement {
 			vector <Type *> type;
 			string s;
 			if (this->type.compare("str") == 0) {
-				s = text.substr(1, text.size() - 2);
-				if(s.substr(s.size() - 2, 2) == "\\n"){
-					// cout << "Hai\n";
-					s = s.substr(0, s.size() - 2);
-					s += "\n";
+				if(this->check){
+					s = text;
+					// if(s.substr(s.size() - 2, 2) == "\\n"){
+					// 	// cout << "Hai\n";
+					// 	s = s.substr(0, s.size() - 2);
+					// 	s += "\n";
+					// }
+					Value* x = Builder.CreateGlobalStringPtr(s);
+					args.push_back(x);
+					type.push_back(x->getType());
 				}
-				Value* x = Builder.CreateGlobalStringPtr(s);
-				args.push_back(x);
-				type.push_back(x->getType());
+				else{
+					s = text.substr(1, text.size() - 2);
+					if(s.substr(s.size() - 2, 2) == "\\n"){
+						// cout << "Hai\n";
+						s = s.substr(0, s.size() - 2);
+						s += "\n";
+					}
+					Value* x = Builder.CreateGlobalStringPtr(s);
+					args.push_back(x);
+					type.push_back(x->getType());
+				}
 			}
 			else if (this->type.compare("loc") == 0) {
 				s = "%d\n";

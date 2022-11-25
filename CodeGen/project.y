@@ -33,7 +33,7 @@
 
 %token <obj> IF ELSE LOOP CONTINUE BREAK EXIT
 
-%token <obj> POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA
+%token <obj> POINT LINE CONIC LINE_PAIR CIRCLE PARABOLA ELLIPSE HYPERBOLA EQ_ CONIC_NAME
 
 %left EQ_OP NE_OP
 %left AND_OP OR_OP
@@ -545,7 +545,16 @@ postfix_expression
 		}
 		else{
 			$$.cg_nd = new Node;
-			$$.cg_nd->cond_expr = new Conditional_expr($1.cg_nd->loc);
+			if(is_identifier_sign==0){
+				Location* temp = new Location(-1);
+				Conditional_expr* temp1 = new Conditional_expr(temp);
+				Conditional_expr* temp2 = new Conditional_expr($1.cg_nd->loc);
+				$$.cg_nd->cond_expr = new Conditional_expr(temp1,"*",temp2);
+				is_identifier_sign=1;
+			}
+			else{
+				$$.cg_nd->cond_expr = new Conditional_expr($1.cg_nd->loc);
+			}
 		}
 	}
 	| IDENTIFIER '(' ')'
@@ -555,6 +564,7 @@ postfix_expression
 		$$.cg_nd = new Node;
 		// $$.cg_nd->num = 7;
 		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name);
+		fun_call_params.clear();
 		$$.cg_nd->cond_expr = new Conditional_expr($$.cg_nd->function_call);
 	}
 	| IDENTIFIER '(' argument_expression_list ')'
@@ -563,16 +573,76 @@ postfix_expression
 		$$.cg_nd = new Node;
 		// $$.cg_nd->num = 7;
 		$$.cg_nd->function_call = new FunctionCall($1.sem_nd.name, fun_call_params);
+		fun_call_params.clear();
 		$$.cg_nd->cond_expr = new Conditional_expr($$.cg_nd->function_call);
 		// fun_call_params.clear();
 	}
 	| IDENTIFIER '.' IDENTIFIER '(' ')'
 	{
+		$$.cg_nd = new Node;
 		string id1 = string($1.sem_nd.name);
 		string id2 = string($3.sem_nd.name);
-		cout << conics[id1]->eq_();
-		$$.cg_nd = new Node;
-		$$.cg_nd->cond_expr = new Conditional_expr();
+		if(id2 == "slope"){
+			if(getLine(id1)){
+				Location* loc = new Location(lines[id1]->slope());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+		}
+		else if(id2 == "delta"){
+			if(getConic(id1)){
+				Location* loc = new Location(lines[id1]->delta());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getLine(id1)){
+				Location* loc = new Location(lines[id1]->delta());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getCircle(id1)){
+				Location* loc = new Location(lines[id1]->delta());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getParabola(id1)){
+				Location* loc = new Location(lines[id1]->delta());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getHyperbola(id1)){
+				Location* loc = new Location(lines[id1]->delta());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getEllipse(id1)){
+				Location* loc = new Location(lines[id1]->delta());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+		}
+		else if(id2 == "eccen"){
+			if(getConic(id1)){
+				Location* loc = new Location(lines[id1]->eccen());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getLine(id1)){
+				Location* loc = new Location(lines[id1]->eccen());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getCircle(id1)){
+				Location* loc = new Location(lines[id1]->eccen());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getParabola(id1)){
+				Location* loc = new Location(lines[id1]->eccen());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getHyperbola(id1)){
+				Location* loc = new Location(lines[id1]->eccen());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+			else if(getEllipse(id1)){
+				Location* loc = new Location(lines[id1]->eccen());
+				$$.cg_nd->cond_expr = new Conditional_expr(loc);
+			}
+		}
+		//else if(id2 == "")
+		// $$.cg_nd = new Node;
+		// $$.cg_nd->cond_expr = new Conditional_expr();
 	}
 	| IDENTIFIER '.' IDENTIFIER '(' argument_expression_list ')'
 	{
@@ -608,6 +678,10 @@ primary_expression
 		}
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location(string($1.sem_nd.name), 0);
+		if(sign < 0){
+			is_identifier_sign = 0;
+			sign = 1;
+		}
 	}		
 	| INT_CONST
 	{
@@ -615,6 +689,9 @@ primary_expression
 		strcpy($$.sem_nd.type, "int"); /*print($$.sem_nd.type);*/ 
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location(stoi($1.sem_nd.name));
+		if(sign == -1){
+			sign = 1;
+		}
 	}
 	| FRAC_CONST
 	{
@@ -627,6 +704,9 @@ primary_expression
 		strcpy($$.sem_nd.type, "double");
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location(stod($1.sem_nd.name));
+		if(sign == -1){
+			sign = 1;
+		}
 	}
 	| STRING_LITERAL
 	{
@@ -761,15 +841,15 @@ declaration
 		if(type == "conic"){
 			conics[string($2.sem_nd.name)] = new Conic(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		} else if(type == "parabola"){
-			conics[string($2.sem_nd.name)] = new Parabola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+			parabolas[string($2.sem_nd.name)] = new Parabola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		} else if(type == "ellipse"){
-			conics[string($2.sem_nd.name)] = new Ellipse(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+			ellipses[string($2.sem_nd.name)] = new Ellipse(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		} else if(type == "hyperbola"){
-			conics[string($2.sem_nd.name)] = new Hyperbola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+			hyperbolas[string($2.sem_nd.name)] = new Hyperbola(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		} else if(type == "circle"){
-			conics[string($2.sem_nd.name)] = new Circle(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+			circles[string($2.sem_nd.name)] = new Circle(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		} else if(type == "line"){
-			conics[string($2.sem_nd.name)] = new Line(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
+			lines[string($2.sem_nd.name)] = new Line(stod($4.sem_nd.name), stoi($6.sem_nd.name), stod($8.sem_nd.name), stoi($10.sem_nd.name), stod($12.sem_nd.name), stoi($14.sem_nd.name));
 		}
 		$$.cg_nd = new Node;
 		$$.cg_nd->decl = new Declaration();
@@ -913,6 +993,56 @@ output
 		$$.cg_nd = new Node;
 		$$.cg_nd->loc = new Location($3.sem_nd.name, 0);
 		$$.cg_nd->print = new Print($$.cg_nd->loc);
+	}
+	| OUTPUT ':' IDENTIFIER '.' EQ_ '(' ')'
+	{
+		$$.cg_nd = new Node;
+		string id = string($3.sem_nd.name);
+		string res;
+		if(getConic(id)){
+			 res = conics[id]->eq_();
+		}
+		else if(getLine(id)){
+			res = lines[id]->eq_();
+		}
+		else if(getCircle(id)){
+			res = circles[id]->eq_();
+		}
+		else if(getParabola(id)){
+			res = parabolas[id]->eq_();
+		}
+		else if(getHyperbola(id)){
+			res = hyperbolas[id]->eq_();
+		}
+		else if(getEllipse(id)){
+			res = ellipses[id]->eq_();
+		}
+		$$.cg_nd->print = new Print(res, 1);
+	}
+	| OUTPUT ':' IDENTIFIER '.' CONIC_NAME '(' ')'
+	{
+		$$.cg_nd = new Node;
+		string id = string($3.sem_nd.name);
+		string res;
+		if(getConic(id)){
+			 res = conics[id]->conic_name();
+		}
+		else if(getLine(id)){
+			res = lines[id]->conic_name();
+		}
+		else if(getCircle(id)){
+			res = circles[id]->conic_name();
+		}
+		else if(getParabola(id)){
+			res = parabolas[id]->conic_name();
+		}
+		else if(getHyperbola(id)){
+			res = hyperbolas[id]->conic_name();
+		}
+		else if(getEllipse(id)){
+			res = ellipses[id]->conic_name();
+		}
+		$$.cg_nd->print = new Print(res, 1);
 	}
 	// : OUTPUT ':' assignment_expression
 	// {
