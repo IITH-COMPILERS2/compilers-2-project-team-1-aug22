@@ -397,9 +397,9 @@ class Conditional_expr: public Statement {
 				else if (operand.compare("*") == 0)
 					v = Builder.CreateMul(left, right, "multmp");
 				else if (operand.compare("/") == 0)
-					v = Builder.CreateUDiv(left, right, "divtmp");
+					v = Builder.CreateSDiv(left, right, "divtmp");
 				else if (operand.compare("%") == 0)
-					v = Builder.CreateURem(left, right, "modtmp");
+					v = Builder.CreateSRem(left, right, "modtmp");
 				else if (operand.compare("||") == 0)
 					v = Builder.CreateOr(left, right, "ortmp");
 				else if (operand.compare("&&") == 0)
