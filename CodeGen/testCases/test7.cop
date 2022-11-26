@@ -1,27 +1,11 @@
-#Given an parabola y=x^2+2. Let (1,3) be a point on the parabola. Find the foot of perpendicular of vertex on the focal chord of the parabola passing through the given point,.
-
-
-line_int : line l1 , line l2 -> point 
+main->int
 <<
-    point temp
-    output: 'Hi'
-    exit : temp
->>   
-
-
-foot_perp : point p , line l -> point
-<<
-    point temp
-    line l1 :  0, 0, 0, 1, m, -2(m*y(p) + x(p))
-    temp = line_int(l, l1)
->> 
-
-
-main -> int 
-<<
-    parabola eqn : 1, 0, 0, 0, -0.5, 2
-    point p : 1, 3
-    point v = vertex(eqn)
-    ans = foot_perp(v, l)
-    exit: 0
+    int a = -10, b = -2, c = -3, d = 4
+    d = a / d
+    b = a / b
+    output : "The value of d is "
+    output : d
+    output : "The value of b is "
+    output : b
+    exit : 0
 >>

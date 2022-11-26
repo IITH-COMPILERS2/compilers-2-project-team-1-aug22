@@ -1,0 +1,19 @@
+main->int
+<<
+    int a=1,b=1,c=1
+    if(a==1)
+    <<
+        if(b==1)
+        <<
+            if(c==1)
+            <<
+                output : "True"
+            >>
+        >>
+    >>
+    else
+    <<
+        output : "False"
+    >>
+    exit : 0
+>>

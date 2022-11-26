@@ -1,10 +1,11 @@
 main->int
 <<
     int a = -10, b = -2, c = -3, d = 4
-    a = a + b
+    a += b
     b = b - a
-    c = c * b * (-10)
+    c *= b * (-10)
     d = d /(-2)
+    d = -d
     output : "The value of a is "
     output : a
     output : "The value of b is "
