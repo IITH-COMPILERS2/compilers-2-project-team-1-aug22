@@ -3,11 +3,11 @@ int ravi = 10, rama = 5
 fun: int b->int
 <<
     int p = 10
-    output: "The Value of p is "
-    output: p
+    output : "The Value of p in function is "
+    output : p
     b = b + 1
-    output: "The Value of b is "
-    output: b
+    output : "The Value of b in function is "
+    output : b
     exit : b
 >>
 
@@ -20,16 +20,16 @@ main->int
     output : b
     if(b % 2 == 0)
     <<
-        output: "Value is Even\n"
+        output : "Value is Even\n"
     >>
     else
     <<
-        output: "Value is Odd\n"
+        output : "Value is Odd\n"
     >>
 
     if(b % 4 == 0)
     <<
-       output: "Value is multiple of 4\n"
+       output : "Value is multiple of 4\n"
     >>
 
     int p = b
@@ -45,14 +45,25 @@ main->int
     output: "Value of c is "
     output: c
     rama = rama + 4
+    
+    output : "Global Variable after adding "
     output: rama
 
     int d = 15
     d += 15
     d *= 2
+    
+    output : "Value of d using *=, += operators is "
     output : d
 
-    point q : 1, 2
+    int a = (100)
+    a = ((a) / (2))
+    a = a + 14
+    output : "Value of a is "
+    output : a
+    a += 14
+    output : "Value of a after adding 14 is "
+    output : a
 
     exit : 0
 >>

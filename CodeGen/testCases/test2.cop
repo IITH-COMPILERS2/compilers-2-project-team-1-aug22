@@ -1,36 +1,36 @@
 main->int
 <<
-    int a = (100)
-    a = ((a) / (2))
-    a = a + 14
-    output : "Hai\n"
-    output : a
-    a += 14
-    output : a
-
-    parabola pq : 0, 0, 1, 2, 0, 0
+    conic pq : 0, 0, 1, 2, 0, 0
     line l : 0, 0, 0, 1, 2, 3
     int p = l.slope()
-    output : p
+    output : "slope of line "
     output : l.eq_()
-    output : "\n"
+    output : " is "
+    output : p
+    output : "Name of the Conic "
+    output : l.eq_()
+    output : " is "
     output : l.conic_name()
     output : "\n"
 
     point pp : 2, 3
     line qq = pq.tangent(pp)
+    output : "Tangent of the conic "
+    output : pq.eq_()
+    output : " at point (2, 3) is "
     output : qq.eq_()
-    output : "\n"
+    output : " with slope "
     int out_slope = qq.slope()
     output : out_slope
 
 
     circle c : 1, 0, 1, 0, 0, 4
+    output : "Area of the Circle "
     output : c.eq_()
     double c_area = c.area()
-    output : "\n"
+    output : " is "
     output : c_area
     output : "\n"
 
-    exit: 10
+    exit: 0
 >>
