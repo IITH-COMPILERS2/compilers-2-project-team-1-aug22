@@ -8,9 +8,29 @@ main->int
     a += 14
     output : a
 
-    parabola pq : 1, 2, 3, 4, 5, 6
+    parabola pq : 0, 0, 1, 2, 0, 0
     line l : 0, 0, 0, 1, 2, 3
-    l.slope()
+    int p = l.slope()
+    output : p
+    output : l.eq_()
+    output : "\n"
+    output : l.conic_name()
+    output : "\n"
+
+    point pp : 2, 3
+    line qq = pq.tangent(pp)
+    output : qq.eq_()
+    output : "\n"
+    int out_slope = qq.slope()
+    output : out_slope
+
+
+    circle c : 1, 0, 1, 0, 0, 4
+    output : c.eq_()
+    double c_area = c.area()
+    output : "\n"
+    output : c_area
+    output : "\n"
 
     exit: 10
 >>
