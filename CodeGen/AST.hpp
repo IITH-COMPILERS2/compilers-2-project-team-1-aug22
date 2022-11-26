@@ -32,6 +32,7 @@ map<string, string> id_type;
 string Function_Name;
 bool is_global_decl = false;
 bool fun_param_init = false;
+bool isbreaked = false;
 Module *ModuleOb;
 
 Type* ConvertTypes(string Type){
@@ -697,7 +698,12 @@ class Block:public AstNode {
 		Value *codegen(){
 			Value *v = ConstantInt::get(Context, APInt(32, 0));
 			for (int i = 0; i < this->block_statements.size(); i++)
-				this->block_statements[i]->codegen();
+			{
+				if(!isbreaked)
+					this->block_statements[i]->codegen();
+				else
+					break;
+			}
 			return v;
 		}
 };
@@ -736,6 +742,11 @@ class LoopStatement:public Statement {
 			Builder.CreateCondBr(loop_condition, loop, after);
 			Builder.SetInsertPoint(loop);
 			Value *value = loop_block->codegen();
+			if(isbreaked){
+				// cout << "Breaked\n";
+				isbreaked = 0;
+				Builder.CreateBr(after);
+			}
 			cond_gen = cond_expr->codegen();
 			Value *after_loop_condition = Builder.CreateICmpNE(cond_gen, Builder.getInt1(0),"whilecon");
 			Builder.CreateCondBr(after_loop_condition, loop, after);
@@ -961,9 +972,13 @@ class Exit: public Statement {
 	private:
 		bool isAss;
 		class Assignment_expr* ass_expr;
+		bool isbreak;
 	public:
 		Exit(){
 			isAss = 0;
+		}
+		Exit(bool br){
+			this->isbreak = br;
 		}
 		Exit(Assignment_expr* ass_expr){
 			this->ass_expr = ass_expr;
@@ -973,18 +988,24 @@ class Exit: public Statement {
 			TBS;
 			tabs++;
 			cout << "<Exit>\n";
-			ass_expr->traverse();
+			if(isAss)
+				ass_expr->traverse();
 			tabs--;
 			TBS;
 			cout << "</Exit>\n";
 		}
 		Value *codegen(){
-			if(isAss){
-				//Value* v = Builder.CreateLoad(Builder.getInt32Ty(), ass_expr->codegen());
-				Builder.CreateRet(ass_expr->codegen());
+			if(!this->isbreak){
+				if(isAss){
+					//Value* v = Builder.CreateLoad(Builder.getInt32Ty(), ass_expr->codegen());
+					Builder.CreateRet(ass_expr->codegen());
+				}
+				else{
+					Builder.CreateRet(Builder.getInt32(0));
+				}
 			}
 			else{
-				Builder.CreateRet(Builder.getInt32(0));
+				isbreaked = 0;
 			}
 		}
 };

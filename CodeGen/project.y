@@ -1093,6 +1093,10 @@ iteration_statement
 jump_statement
 	: CONTINUE EOL 
 	| BREAK EOL
+	{
+		$$.cg_nd = new Node;
+		$$.cg_nd->exit = new Exit(1);
+	}
 	| EXIT exit
 	{
 		$$.sem_nd.nd = mknode(NULL, $2.sem_nd.nd, "EXIT_EXPR");
