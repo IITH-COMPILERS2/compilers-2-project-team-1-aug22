@@ -47,7 +47,7 @@
   assignment_operator conditional_expression logical_or_expression logical_and_expression
   equality_expression relational_expression additive_expression multiplicative_expression
   cast_expression unary_expression unary_operator postfix_expression primary_expression
-  argument_expression_list statement_list statement /*declaration_list*/ declaration 
+  argument_expression_list statement_list statement /*declaration_list*/ declaration out_types
   mulendoflines init_declarator_list init_declarator declarator jump_statement exit input output temp_fun
   direct_declarator identifier_list initializer selection_statement iteration_statement 
 
@@ -665,11 +665,11 @@ postfix_expression
 		}
 		else if(id2 == "area"){
 			if(getCircle(id1)){
-				Location* loc = new Location(int(circles[id1]->area()));
+				Location* loc = new Location((circles[id1]->area()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 			else if(getEllipse(id1)){
-				Location* loc = new Location(int(ellipses[id1]->area()));
+				Location* loc = new Location((ellipses[id1]->area()));
 				$$.cg_nd->cond_expr = new Conditional_expr(loc);
 			}
 		}
@@ -1118,21 +1118,33 @@ exit
 	;
 
 output
-	: OUTPUT ':' STRING_LITERAL
+	: OUTPUT ':' out_types
 	{
-		$$.cg_nd = new Node;
-		$$.cg_nd->print = new Print(string($3.sem_nd.name));
+		$$.cg_nd = $3.cg_nd;
 	}
-	| OUTPUT ':' IDENTIFIER
+	// : OUTPUT ':' assignment_expression
+	// {
+	// 	$$.cg_nd = new Node;
+	// 	$$.cg_nd->print = new Print($3.cg_nd->ass_expr);
+	// }
+	;
+
+out_types
+	: STRING_LITERAL
 	{
 		$$.cg_nd = new Node;
-		$$.cg_nd->loc = new Location($3.sem_nd.name, 0);
+		$$.cg_nd->print = new Print(string($1.sem_nd.name));
+	}
+	| IDENTIFIER
+	{
+		$$.cg_nd = new Node;
+		$$.cg_nd->loc = new Location($1.sem_nd.name, 0);
 		$$.cg_nd->print = new Print($$.cg_nd->loc);
 	}
-	| OUTPUT ':' IDENTIFIER '.' EQ_ '(' ')'
+	| IDENTIFIER '.' EQ_ '(' ')'
 	{
 		$$.cg_nd = new Node;
-		string id = string($3.sem_nd.name);
+		string id = string($1.sem_nd.name);
 		string res;
 		if(getConic(id)){
 			 res = conics[id]->eq_();
@@ -1154,10 +1166,10 @@ output
 		}
 		$$.cg_nd->print = new Print(res, 1);
 	}
-	| OUTPUT ':' IDENTIFIER '.' CONIC_NAME '(' ')'
+	| IDENTIFIER '.' CONIC_NAME '(' ')'
 	{
 		$$.cg_nd = new Node;
-		string id = string($3.sem_nd.name);
+		string id = string($1.sem_nd.name);
 		string res;
 		if(getConic(id)){
 			 res = conics[id]->conic_name();
@@ -1179,12 +1191,8 @@ output
 		}
 		$$.cg_nd->print = new Print(res, 1);
 	}
-	// : OUTPUT ':' assignment_expression
-	// {
-	// 	$$.cg_nd = new Node;
-	// 	$$.cg_nd->print = new Print($3.cg_nd->ass_expr);
-	// }
 	;
+
 input
 	: INPUT ':' IDENTIFIER
 	{

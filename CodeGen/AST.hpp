@@ -28,6 +28,7 @@ Function *fooFunc;
 static LLVMContext Context;
 static IRBuilder<> Builder(Context);
 vector<map<string, AllocaInst*>> LocalVars;
+map<string, string> id_type;
 string Function_Name;
 bool is_global_decl = false;
 bool fun_param_init = false;
@@ -380,8 +381,12 @@ class Conditional_expr: public Statement {
 		Value *codegen(){
 			if (this->getType().compare("Unary_Cond") == 0) {
 				Value *v = loc->codegen();
-				if(loc->getType().compare("variable") == 0)
-					v = Builder.CreateLoad(Builder.getInt32Ty(), v, "string");
+				if(loc->getType().compare("variable") == 0){
+					if(id_type[loc->getIdentifier()] == "int")
+						v = Builder.CreateLoad(Builder.getInt32Ty(), v, "string");
+					else if(id_type[loc->getIdentifier()] == "double")
+						v = Builder.CreateLoad(Builder.getDoubleTy(), v, "string");
+				}
 				return v;
 			}
 			else if (this->getType().compare("Cond") == 0) {
@@ -499,6 +504,7 @@ class Variable: public AstNode {
 			this->type = ty;
 			this->ass_expr = NULL;
 			this->isAss = 0;
+			id_type[this->identifier] = this->type;
 		}
 		Variable(string id, string ty, class Assignment_expr* ass_expr){
 			this->identifier = id;
@@ -506,6 +512,7 @@ class Variable: public AstNode {
 			this->ass_expr = ass_expr;
 			this->isAss = 1;
 			this->loc = new Location(this->identifier, 0);
+			id_type[this->identifier] = this->type;
 		}
 		string getType(){
 			return this->type;
@@ -863,18 +870,35 @@ class Print:public Statement {
 				}
 			}
 			else if (this->type.compare("loc") == 0) {
-				s = "%d\n";
-				Value* x = Builder.CreateGlobalStringPtr(s);
-				args.push_back(x);
-				type.push_back(x->getType());
-				v = value->codegen();
-				v = Builder.CreateLoad(Builder.getInt32Ty(), v,"loc");
-				// if (v == 0) {
-				// 	errors++;
-				// 	reportError::ErrorV("Unknown Variable in PRINT");
-				// }
-				args.push_back(v);
-				type.push_back(v->getType());
+				if(id_type[this->value->getIdentifier()] == "int"){
+					cout << "hai\n";
+					s = "%d\n";
+					Value* x = Builder.CreateGlobalStringPtr(s);
+					args.push_back(x);
+					type.push_back(x->getType());
+					v = value->codegen();
+					v = Builder.CreateLoad(Builder.getInt32Ty(), v,"loc");
+					// if (v == 0) {
+					// 	errors++;
+					// 	reportError::ErrorV("Unknown Variable in PRINT");
+					// }
+					args.push_back(v);
+					type.push_back(v->getType());
+				}
+				else if(id_type[this->value->getIdentifier()] == "double"){
+					s = "%lf\n";
+					Value* x = Builder.CreateGlobalStringPtr(s);
+					args.push_back(x);
+					type.push_back(x->getType());
+					v = value->codegen();
+					v = Builder.CreateLoad(Builder.getDoubleTy(), v,"loc");
+					// if (v == 0) {
+					// 	errors++;
+					// 	reportError::ErrorV("Unknown Variable in PRINT");
+					// }
+					args.push_back(v);
+					type.push_back(v->getType());
+				}
 			}
 			else if(this->type.compare("Ass") == 0){
 				s = "%d\n";
